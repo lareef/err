@@ -1,0 +1,32 @@
+{% extends "base.html" %} {% load tailwind_filters %} {% block content %}
+<div class="max-w-lg mx-auto">
+  <div class="max-w-lg mx-auto border-b">
+    <h1 class="text-4xl text-gray-800">Signup Form</h1>
+  </div>
+  <form method="post" class="mt-5">
+    {% csrf_token %} {{form|crispy}}
+    <button
+      type="submit"
+      class="w-full text-white bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded-md"
+    >
+      Signup
+    </button>
+  </form>
+  <div class="py-5 border-t border-gray-200 mt-5">
+    Already have an account?
+    <a
+      class="hover:text-blue-500 mt-3"
+      href="{% url 'util:login' %}"
+      rel="noopener noreferrer"
+    >
+      Login
+    </a>
+  </div>
+</div>
+{% endblock content %} {% comment %} {% extends "base.html" %} {% block content
+%}
+<form method="post">
+  {% csrf_token %} {{form.as_p}}
+  <button type="submit">Signup</button>
+</form>
+{% endblock content %} {% endcomment %}

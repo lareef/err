@@ -1,0 +1,58 @@
+{% extends "base.html" %} {% load tailwind_filters %} {% block content %}
+  <section class="text-gray-600 body-font">
+      <div id="main" class="w-9/10 my-6 mx-auto p-2 lg:p-10 bg-white rounded-xl" >
+        <form
+          class="flex mb-6 space-x-4"
+          hx-post="{% url 'note:add_note' %}"
+          hx-target="#notes"
+          hx-swap="afterend"
+        >
+          <select
+          id="notetypelist" name="notetype" placeholder="NoteType" class="note flex-1 px-4 py-3 bg-gray-200 rounded-xl"
+            hx-get="notes{{ notetype.id }}/"
+            hx-trigger="change"
+            hx-target="#notes"
+            hx-swap="outerHTML"/>
+            <option value="">Note Type</option>
+          {% for notetype in notetypes %}
+            <option value="{{ notetype.id}}">{{ notetype }}</option>
+          {% endfor %}
+          </select>
+          <select
+          id="clientlist" name="client" placeholder="Client" class="note flex-1 px-4 py-3 bg-gray-200 rounded-xl"
+            hx-get="notes{{ client.id }}/"
+            hx-trigger="change"
+            hx-target="#notes"
+            hx-swap="outerHTML"/>
+          <option value="">Client</option>
+          {% for client in clients %}
+            <option value="{{ client.id}}">{{ client }}</option>
+          {% endfor %}
+          </select>
+          <input
+            type="text"
+            name="notekey"
+            class="title flex-1 px-4 py-3 bg-gray-200 rounded-xl"
+            placeholder="Note #"
+          />
+          <button class="p-3 rounded-xl text-white bg-gray-400 hover:bg-gray-600">
+            +
+          </button>
+        </form>
+
+        <div class="flex py-3 rounded-xl bg-gray-100">
+          <div class="w-4/5">
+            <p class="px-6 text-xs font-medium text-gray-500 uppercase">Title</p>
+          </div>
+
+          <div class="hidden md:block w-1/5 px-6 text-right">
+            <p class="text-xs font-medium text-gray-500 uppercase">Actions</p>
+          </div>
+        </div>
+
+        <div class="divide-y divide-gray-200" id="notes">
+          {% for note in notes %} {% include 'note/partials/note.html' %} {%endfor %}
+        </div>
+      </div>
+  </section>
+{% endblock content %}

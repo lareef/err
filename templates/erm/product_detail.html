@@ -1,0 +1,50 @@
+{% extends "base.html" %} {% load tailwind_filters %} {% block content %}
+
+<section class="text-gray-600 body-font">
+  <div class="container px-5 py-2 mx-auto">
+    <div class="max-w-lg mx-auto">
+      <div class="max-w-lg mx-auto">
+        <h1 class="text-2xl text-gray-800">
+          Product - {{ product.description }}
+        </h1>
+      </div>
+      <div class="py-5 border-b border-gray-200">
+        <a
+          class="hover:text-blue-500"
+          href="{% url 'erm:product-list' %}"
+          rel="noopener noreferrer"
+          >Product List</a
+        >
+      </div>
+
+      <div class="flex border-t border-b mb-6 border-gray-200 py-2">
+        <span class="text-gray-500">Description</span>
+        <span class="ml-auto text-gray-900">{{ product.description }}</span>
+      </div>
+      <div class="flex border-t border-b mb-6 border-gray-200 py-2">
+        <span class="text-gray-500">Collection</span>
+        <span class="ml-auto text-gray-900">{{ product.collection }}</span>
+      </div>
+      <div class="flex border-t border-b mb-6 border-gray-200 py-2">
+        <span class="text-gray-500">Re-order level</span>
+        <span class="ml-auto text-gray-900">{{ product.reorder_level }}</span>
+      </div>
+
+      <div class="mt-2 py-2 border-t border-gray-200">
+        <a
+          href="{% url 'erm:product-update' product.product_id %}"
+          class="flex w-full text-white justify-center bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded"
+          >Update</a
+        >
+      </div>
+      <div class="mt-2 py-2 border-t border-gray-200">
+        <a
+          href="{% url 'erm:product-delete' product.product_id %}"
+          class="flex w-full text-white justify-center bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded"
+          >Delete</a
+        >
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock content %}

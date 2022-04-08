@@ -1,0 +1,40 @@
+<article class="flex{% if noteitem.is_final %} bg-green-50{% endif %}">
+  <div class="w-4/5 py-3">
+    <p
+      class="px-6 text-xs text-gray-900"
+      {% if note.status_id == 0 %} hx-get="edit_noteitem/{{ noteitem.id }}/" {% endif %}   
+      hx-target="this"
+      hx-swap="outerHTML"
+    >
+      {{ noteitem.product }}      
+      {{ noteitem.quantity }}
+      {{ noteitem.cost }}
+      {{ noteitem.weight }}
+      {{ noteitem.notetypekey }}
+      {{ noteitem.notekey }}
+      {{ noteitem.id }}
+    </p>
+  </div>
+
+  <div class="w-1/5 px-6 py-3 flex justify-end space-x-4">
+    {% if note.status_id == 0 %}
+    <form
+      hx-put="update_noteitem/{{ noteitem.id }}/"
+      hx-target="closest article"
+      hx-swap="outerHTML"
+    >
+      <button class="text-sky-600 hover:text-sky-900">Done</button>
+    </form>
+    <a
+      href="#"
+      class="text-sky-600 hover:text-sky-900"
+      hx-confirm="Are you sure?"
+      hx-target="closest article"
+      hx-swap="outerHTML swap:1s"
+      hx-delete="delete_noteitem/{{ noteitem.id }}/"
+    >
+      Delete
+    </a> 
+    {% endif %}
+  </div>
+</article>

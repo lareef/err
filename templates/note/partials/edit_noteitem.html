@@ -1,0 +1,36 @@
+<form
+  hx-post="edit_noteitem/{{ noteitem.id }}/"
+  hx-target="closest article"
+  hx-swap="outerHTML"
+  class="flex"
+>
+      <input
+        list="product"
+        name="product"
+        class="flex-1 mr-4 px-6 text-xs text-gray-900 border-0"
+        placeholder="product"
+        value="{{ noteitem.product }}"
+      />
+      <input
+        type="text"
+        name="quantity"
+        class="flex-1 mr-4 px-6 text-xs text-gray-900 border-0"
+        value="{{ noteitem.quantity }}"
+        placeholder="quantity"
+      />      
+      <input
+        type="text"
+        name="cost"
+        class="flex-1 mr-4 px-6 text-xs text-gray-900 border-0"
+        value="{{ noteitem.cost }}"
+        placeholder="cost"
+      />
+      <input
+        type="text"
+        name="weight"
+        class="flex-1 mr-4 px-6 text-xs text-gray-900 border-0"
+        value="{{ noteitem.weight }}"
+        placeholder="weight"
+      />
+  <button class="flex-1 text-sky-600 hover:text-sky-900">Save</button>
+</form>

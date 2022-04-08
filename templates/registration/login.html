@@ -1,0 +1,35 @@
+{% extends "base.html" %} {% load tailwind_filters %} {% block content %}
+<section class="text-gray-600 body-font relative">
+  <div class="container px-5 py-2 mx-auto">
+    <div class="max-w-lg mx-auto">
+      <div class="py-5 border-b border-gray-200">
+        Don't have an account?
+        <a
+          class="hover:text-blue-500"
+          href="{% url 'util:signup' %}"
+          rel="noopener noreferrer"
+          >Signup</a
+        >
+      </div>
+      <form method="post" class="mt-5">
+        {% csrf_token %} {{form|crispy}}
+        <button
+          type="submit"
+          class="w-full text-white bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded-md"
+        >
+          Login
+        </button>
+      </form>
+      <div class="py-5 border-t border-gray-200 mt-5">
+        <a
+          class="hover:text-blue-500 mt-3"
+          href="{% url 'util:reset-password' %}"
+          rel="noopener noreferrer"
+          >Fogot password?</a
+        >
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock content %}

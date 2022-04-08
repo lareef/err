@@ -1,0 +1,69 @@
+<div id="noteitems">
+  <div class="w-6/7 my-6 mx-auto p-2 lg:p-1 bg-white rounded-xl">
+    <form class="flex mb-6 space-x-4">
+      <label class="note flex-1 px-4 py-3 bg-blue-200 rounded-xl">
+        {{ note.notekey }}
+      </label>
+        <datalist id="product">
+        <option value="">Product</option>
+          {% for product in products %}
+            <option value="{{ product.product_name}}"></option>
+          {% endfor %}
+        </datalist>
+      <input
+        list="product"
+        name="product"
+        class="title flex-1 px-4 py-3 bg-gray-200 rounded-xl"
+        placeholder="product"
+      />
+      <input
+        type="text"
+        name="quantity"
+        class="title flex-1 px-4 py-3 bg-gray-200 rounded-xl"
+        placeholder="quantity"
+      />      
+      <input
+        type="text"
+        name="weight"
+        class="title flex-1 px-4 py-3 bg-gray-200 rounded-xl"
+        placeholder="weight"
+      />
+      <input
+        type="text"
+        name="cost"
+        class="title flex-1 px-4 py-3 bg-gray-200 rounded-xl"
+        placeholder="cost"
+      />
+      {% if note.status_id == 0 %}
+      <button
+        hx-post="{% url 'note:add_noteitem' note.id %}"
+        hx-target="#noteitemlist"
+        hx-swap="afterend"
+        class="p-3 rounded-xl text-white bg-gray-400 hover:bg-gray-600"
+      >
+        +
+      </button>
+      {% endif %}
+      <button
+        {% comment %} hx-get="{% url 'notescopy' %}" {% endcomment %}
+        class="p-3 rounded-xl text-white bg-red-500 hover:bg-red-600"
+        hx-target="#noteitems"
+      >
+        X
+      </button>
+    </form>
+    <div class="flex py-3 rounded-xl bg-gray-100">
+      <div class="w-4/5">
+        <p class="px-6 text-xs font-medium text-gray-500 uppercase">Title</p>
+      </div>
+
+      <div class="hidden md:block w-1/5 px-6 text-right">
+        <p class="text-xs font-medium text-gray-500 uppercase">Actions</p>
+      </div>
+    </div>
+
+    <div class="divide-y divide-gray-200" id="noteitemlist">
+      {% for noteitem in noteitems %} {% include 'note/partials/noteitem.html' %} {% endfor %}
+    </div>
+  </div>
+</div>

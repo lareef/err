@@ -1,0 +1,36 @@
+{% load tailwind_filters %} {% block content %}
+
+    <form method="POST">
+      {% csrf_token %} {{form|crispy}} {% if poitem %}
+      <button
+        hx-post="{% url 'erm:update-docitem' poitem.id %}"
+        hx-target="#itemlist"
+        hx-swap="beforeend"
+        type="submit"
+        class="w-full text-white bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded-md"
+      >
+        Item - Update
+      </button>
+      {% else %}
+      <dev>
+        <button
+          hx-post="."
+          hx-target="#itemlist"
+          hx-swap="afterend"
+          type="submit"
+          class="inline-flex text-white bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded-md"
+        >
+          Add
+        </button>
+        <button
+          hx-get="."
+          class="inline-flex text-white bg-yellow-400 hover:bg-yellow-600 px-3 py-2 rounded-md"
+        >
+          Cancel
+        </button>
+      </dev>
+      {% endif %}
+    </form>
+
+
+{% endblock content %}

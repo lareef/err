@@ -1,0 +1,40 @@
+<article class="flex{% if note.is_final %} bg-green-50{% endif %}">
+  <div class="w-4/5 py-3">
+    <a
+      class="px-6 text-xs text-gray-900"
+      {% comment %} hx-get="notelist/{{ note_id=note.id }}/" {% endcomment %}
+      hx-get="noteitems/{{ note.id}}/"
+      hx-target="#main"
+      hx-swap="outerHTML"
+    >
+      {{ note.notetype }} -
+      {{ note.notekey }}
+      {{ note.created_on }}
+      {{ note.id }}
+    </a>
+  </div>
+
+  <div class="w-1/5 px-6 py-3 flex justify-end space-x-4">
+    {% if note.status_id == 0 %}
+    <form
+      hx-put="update_note/{{ note.id }}/"
+      hx-target="closest article"
+      hx-swap="outerHTML"
+    >
+      <button class="text-sky-600 hover:text-sky-900">Close</button>
+    </form>
+
+
+    <a
+      href="#"
+      class="text-sky-600 hover:text-sky-900"
+      hx-confirm="Are you sure?"
+      hx-target="closest article"
+      hx-swap="outerHTML swap:1s"
+      hx-delete="delete_note/{{ note.id }}/"
+    >
+      Delete
+    </a>
+    {% endif %}    
+  </div>
+</article>

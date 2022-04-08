@@ -1,0 +1,33 @@
+{% load tailwind_filters %} {% block content %}
+
+    <form method="POST">
+      {% csrf_token %} {{form|crispy}} {% if poitem %}
+      <button
+        hx-post="{% url 'erm:update-poitem' poitem.id %}"
+        type="submit"
+        class="w-full text-white bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded-md"
+      >
+        Item - Update
+      </button>
+      {% else %}
+      <dev>
+        <button
+          hx-post="."
+      hx-target="#itemforms"
+          type="submit"
+          class="inline-flex text-white bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded-md"
+        >
+          Add
+        </button>
+        <button
+          hx-get="."
+          class="inline-flex text-white bg-yellow-400 hover:bg-yellow-600 px-3 py-2 rounded-md"
+        >
+          Cancel
+        </button>
+      </dev>
+      {% endif %}
+    </form>
+
+
+{% endblock content %}
