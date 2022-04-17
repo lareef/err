@@ -7,6 +7,7 @@
           hx-target="#notes"
           hx-swap="afterend"
         >
+
           <select
           id="notetypelist" name="notetype" placeholder="NoteType" class="note flex-1 px-4 py-3 bg-gray-200 rounded-xl"
             hx-get="notes{{ notetype.id }}/"
@@ -18,6 +19,15 @@
             <option value="{{ notetype.id}}">{{ notetype }}</option>
           {% endfor %}
           </select>
+
+          <select
+          id="locationlist" name="location" placeholder="Location" class="note flex-1 px-4 py-3 bg-gray-200 rounded-xl"/>
+          <option value="">Location</option>
+          {% for loc in locations %}
+            <option value="{{ loc.id}}">{{ loc }}</option>
+          {% endfor %}
+          </select>
+
           <select
           id="clientlist" name="client" placeholder="Client" class="note flex-1 px-4 py-3 bg-gray-200 rounded-xl"
             hx-get="notes{{ client.id }}/"
@@ -29,6 +39,7 @@
             <option value="{{ client.id}}">{{ client }}</option>
           {% endfor %}
           </select>
+
           <input
             type="text"
             name="notekey"

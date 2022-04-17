@@ -10,3 +10,5 @@ class POAdmin(admin.ModelAdmin):
 admin.site.register(models.PurchaseOrder, POAdmin)
 admin.site.register(models.Collection)
 admin.site.register(models.Product)
+admin.site.register(models.ClientType)
+admin.site.register(models.Customer)

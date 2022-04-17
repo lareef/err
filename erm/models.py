@@ -40,9 +40,17 @@ class Inventory(models.Model):
     Store = models.ForeignKey(Store, on_delete=models.CASCADE)
     location = models.ForeignKey(Location, on_delete=models.CASCADE, null = True)
     from_source = models.CharField(max_length=10)
-    
+
+class ClientType(models.Model):
+    clienttype = models.CharField(max_length=20)
+    def __str__(self):
+        return self.clienttype
+            
 class Customer(models.Model):
     customer_name = models.CharField(max_length=100)
+    client_type = models.ManyToManyField(ClientType)
+    def __str__(self):
+        return self.customer_name
 
 class PurchaseOrder(models.Model):
     purchase_order_id = models.IntegerField(primary_key=True)

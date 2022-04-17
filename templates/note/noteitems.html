@@ -4,36 +4,48 @@
       <label class="note flex-1 px-4 py-3 bg-blue-200 rounded-xl">
         {{ note.notekey }}
       </label>
-        <datalist id="product">
-        <option value="">Product</option>
+
+      <select
+          id="productlist" name="product" hx-trigger="change" hx-get="invlist/" hx-target="#invlist" placeholder="Product" class="title flex-1 px-4 py-3 bg-gray-200 rounded-xl"/>
+          <option value="">Product</option>
           {% for product in products %}
-            <option value="{{ product.product_name}}"></option>
+            <option value="{{ product.id}}">{{ product.product_name }}</option>
           {% endfor %}
-        </datalist>
+      </select>
+
+
+      {% if note.notetype_id == 2 %}
+      <select
+          id="invlist" name="weight" placeholder="Availablr Items Weight" class="title flex-1 px-4 py-3 bg-gray-200 rounded-xl"/>
+        <option value="">Available Items Weight</option>
+      </select>
+      {% else %}
       <input
-        list="product"
-        name="product"
-        class="title flex-1 px-4 py-3 bg-gray-200 rounded-xl"
-        placeholder="product"
-      />
-      <input
-        type="text"
-        name="quantity"
-        class="title flex-1 px-4 py-3 bg-gray-200 rounded-xl"
-        placeholder="quantity"
-      />      
-      <input
-        type="text"
+        type="number"
         name="weight"
+        step=".01"
         class="title flex-1 px-4 py-3 bg-gray-200 rounded-xl"
         placeholder="weight"
       />
+      {% endif %}
+
       <input
-        type="text"
+        type="number"
+        name="quantity"
+        min="1"
+        max="100"
+        class="title flex-1 px-4 py-3 bg-gray-200 rounded-xl"
+        placeholder="quantity"
+      />      
+
+      <input
+        type="number"
         name="cost"
+        step=".01"
         class="title flex-1 px-4 py-3 bg-gray-200 rounded-xl"
         placeholder="cost"
       />
+
       {% if note.status_id == 0 %}
       <button
         hx-post="{% url 'note:add_noteitem' note.id %}"
@@ -44,6 +56,7 @@
         +
       </button>
       {% endif %}
+
       <button
         {% comment %} hx-get="{% url 'notescopy' %}" {% endcomment %}
         class="p-3 rounded-xl text-white bg-red-500 hover:bg-red-600"
@@ -51,6 +64,7 @@
       >
         X
       </button>
+
     </form>
     <div class="flex py-3 rounded-xl bg-gray-100">
       <div class="w-4/5">

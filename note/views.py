@@ -1,53 +1,79 @@
+from operator import gt
 from django.shortcuts import render
 from django.http.response import HttpResponse
 from django.views.decorators.http import require_http_methods
 
-from .models import Client, Note, Noteitem, Notekey, Notetype, Status, Noteitemkey, PO, POItem, Product, SO, SOItem, CO, COItem, WO, WOItem, Inv, InvControl
+from .models import Client, Note, Noteitem, Location, Notekey, Notetype, Status, Noteitemkey, PO, POItem, PR, PRItem, Product, SO, SOItem, SR, SRItem, CO, COItem, WI, WR, WIItem, WRItem, Inv, InvControl
 
 def notes(request):
-    notetypes = Notetype.objects.all()
-    clients = Client.objects.all()
-    #pk = request.POST.get('notetype', '')
+    
+    notes = None
+    
+    notetype = request.GET.get('notetype', '')
+    client = request.GET.get('client', '')
+    location = request.GET.get('location', '')
+
+    if notetype or client:
+        if notetype and client and location:
+            notes = Note.objects.filter(notetype_id=notetype, client_id=client, location_id=location)
+        if notetype and client=='' and location =='':
+            notes = Note.objects.filter(notetype_id=notetype)
+        if notetype and location and client=='':
+            notes = Note.objects.filter(notetype_id=notetype, location_id=location)
+        if notetype and location=='' and client:
+            notes = Note.objects.filter(notetype_id=notetype, client_id=client)
+        if notetype=="" and client:
+            notes = Note.objects.filter(client_id=client)
+        if notetype=="" and client and location:
+            notes = Note.objects.filter(client_id=client, location_id=location)
+        #return render(request, 'note/notes.html', {'notes': notes, 'notetypes': notetypes, 'clients': clients, 'locations': locations, 's_notetype': s_notetype})
+    
+    return render(request, 'note/notes.html', {'notes': notes})
+
+    
+''' def notes(request):
+    
     selected = {}
     notes = None
     client = None
+    location = None
     s_notetype = None
+    
     if request.method == 'GET':
         s_notetype = request.GET.get('notetype', '')
         client = request.GET.get('client', '')
+        location = request.GET.get('location', '')
 
         selected['client']=client
+        selected['location']=location
         selected['notetype']=s_notetype
     
         if s_notetype or client:
-            if s_notetype and client:
-                notes = Note.objects.filter(notetype_id=s_notetype, client_id=client)
+            if s_notetype and client and location:
+                notes = Note.objects.filter(notetype_id=s_notetype, client_id=client, location_id=location)
             if s_notetype and client=="":
                 notes = Note.objects.filter(notetype_id=s_notetype)
+            if s_notetype and location and client=="":
+                notes = Note.objects.filter(notetype_id=s_notetype, location_id=location)
             if s_notetype=="" and client:
                 notes = Note.objects.filter(client_id=client)
-        return render(request, 'note/notes.html', {'notes': notes, 'notetypes': notetypes, 'clients': clients, 's_notetype': s_notetype})
-    return render(request, 'note/init.html', {'notes': notes, 'notetypes': notetypes, 'clients': clients, 's_notetype': s_notetype, 'selected': selected})
+            if s_notetype=="" and client and location:
+                notes = Note.objects.filter(client_id=client, location_id=location)
+            #return render(request, 'note/notes.html', {'notes': notes, 'notetypes': notetypes, 'clients': clients, 'locations': locations, 's_notetype': s_notetype})
+            return render(request, 'note/notes.html', {'notes': notes})
 
-# def notes_client(request):
-#     notetypes = Notetype.objects.all()
-#     #pk = request.POST.get('notetype', '')
-#     notes = None
-#     client = None
-#     if request.method == 'GET':
-#         notetype = request.GET.get('notetype', '')
-#         client = request.GET.get('client', '')
-#         if notetype and client:
-#             notes = Note.objects.filter(notetype_id=notetype, client=client)
-#         return render(request, 'note/notes.html', {'notes': notes, 'notetypes': notetypes, 'client': client})
-#     return render(request, 'note/init.html', {'notes': notes, 'notetypes': notetypes, 'client': client})
+    notetypes = Notetype.objects.all()
+    clients = Client.objects.all()
+    locations = Location.objects.all()
 
+    return render(request, 'note/init.html', {'notes': notes, 'notetypes': notetypes, 'clients': clients, 'locations': locations, 's_notetype': s_notetype, 'selected': selected})
+ '''
 def init(request):
     notetypes = Notetype.objects.all()
     clients = Client.objects.all()
-    #pk = request.POST.get('notetype', '')
+    locations = Location.objects.all()
     notes = None
-    return render(request, 'note/init.html', {'notes': notes, 'notetypes': notetypes, 'clients': clients})
+    return render(request, 'note/init.html', {'notes': notes, 'notetypes': notetypes, 'locations': locations, 'clients': clients })
 
 @require_http_methods(['POST'])
 def add_note(request):
@@ -65,8 +91,16 @@ def add_note(request):
             obj_po, create_po = PO.objects.get_or_create(notekey=obj_notekey, notetype=obj_notetype, typ=obj_notetype.id, client=obj_client)
             obj_note = Note.objects.get(id=obj_po.note_ptr_id)
 
+        if obj_notetype.id == 11:
+            obj_po, create_po = PR.objects.get_or_create(notekey=obj_notekey, notetype=obj_notetype, typ=obj_notetype.id, client=obj_client)
+            obj_note = Note.objects.get(id=obj_po.note_ptr_id)
+
         if obj_notetype.id == 2:
             obj_so, create_so = SO.objects.get_or_create(notekey=obj_notekey, notetype=obj_notetype, typ=obj_notetype.id, client=obj_client)
+            obj_note = Note.objects.get(id=obj_so.note_ptr_id)
+
+        if obj_notetype.id == 12:
+            obj_so, create_so = SR.objects.get_or_create(notekey=obj_notekey, notetype=obj_notetype, typ=obj_notetype.id, client=obj_client)
             obj_note = Note.objects.get(id=obj_so.note_ptr_id)
 
         if obj_notetype.id == 3:
@@ -74,11 +108,13 @@ def add_note(request):
             obj_note = Note.objects.get(id=obj_co.note_ptr_id)
 
         if obj_notetype.id == 4:
-            obj_wo, create_so = WO.objects.get_or_create(notekey=obj_notekey, notetype=obj_notetype, typ=obj_notetype.id, client=obj_client)
+            obj_wo, create_so = WI.objects.get_or_create(notekey=obj_notekey, notetype=obj_notetype, typ=obj_notetype.id, client=obj_client)
             obj_note = Note.objects.get(id=obj_wo.note_ptr_id)
-        
-        #obj_notekey, create_notekey = Notekey.objects.get_or_update(notekey=obj_notekey, notetype=obj_notetype)
-
+ 
+        if obj_notetype.id == 14:
+            obj_wo, create_so = WR.objects.get_or_create(notekey=obj_notekey, notetype=obj_notetype, typ=obj_notetype.id, client=obj_client)
+            obj_note = Note.objects.get(id=obj_wo.note_ptr_id)
+                   
     return render(request, 'note/partials/note.html', {'note': obj_note})
 
 @require_http_methods(['GET', 'POST'])
@@ -118,12 +154,24 @@ def delete_note(request, pk):
 def noteitems(request, pk):
     #notekey = Notekey.objects.get(notekey=noteref)
     note = Note.objects.get(id=pk)
+    invlist=None
+
     products = Product.objects.all()
     noteref = note.notekey_id
     noteitems = Noteitem.objects.filter(notekey_id=noteref, notetypekey_id=note.notetype_id)
+
+    # if note.notetype_id==1 and request.method == 'GET' and request.GET.get('product', ''):
+    #     invlist = Inv.objects.filter(product_id=request.GET.get('product', ''))
+
     #note = Note.objects.filter(notekey_id=notekey)[:1].get()
 
-    return render(request, 'note/noteitems.html', {'noteref': noteref, 'noteitems': noteitems, 'note': note, 'products': products})
+    return render(request, 'note/noteitems.html', {'noteref': noteref, 'noteitems': noteitems, 'note': note, 'products': products, 'invlist': invlist})
+
+@require_http_methods(['GET', 'POST'])
+def invlist(request):
+    #invlist = Inv.objects.filter(product_id=request.GET.get('product', ''))
+    invlist = InvControl.objects.filter(product_id=request.GET.get('product', ''), inventory__gt =0 )
+    return render(request, 'note/invlist.html', {'invlist':invlist})
 
 @require_http_methods(['GET', 'POST'])
 def edit_noteitem(request, pk):
@@ -138,9 +186,7 @@ def edit_noteitem(request, pk):
         noteitem.cost = request.POST.get('cost', '')
         noteitem.weight = request.POST.get('weight', '')
         noteitem.save()
-        
-        
-        
+  
         #note = Note.objects.filter(notekey_id=notekey)[:1].get()
 
         return render(request, 'note/partials/noteitem.html', {'noteitem': noteitem})
@@ -150,10 +196,12 @@ def edit_noteitem(request, pk):
 @require_http_methods(['POST'])
 def add_noteitem(request, note):
     noteitem = None
+    #invlist = None
     product = request.POST.get('product', '')
     quantity = request.POST.get('quantity', '')
     cost = request.POST.get('cost', '')
-    weight = request.POST.get('weight', '')
+    weight = request.POST.get('weight', '').split('-')[0]
+    s_noteitem = request.POST.get('weight', '').split('-')[1]
 
     if note:
         note = Note.objects.get(id=note)
@@ -161,10 +209,19 @@ def add_noteitem(request, note):
         obj_notetype = Notetype.objects.get(id=note.notetype_id)
         obj_noteitemkey, create_noteitemkey = Noteitemkey.objects.get_or_create(notekey=obj_notekey)
         if product:
-            obj_product = Product.objects.get(product_name=product)
-            #obj_invitem, create_invitem = Invitem.objects.get_or_create(product=obj_product, weight=weight)
+            obj_product = Product.objects.get(id=product)
+
+            obj_invitem, create_invitem = Inv.objects.get_or_create(product=obj_product, weight=weight)
+
+            # quantity based on inv
+            qty = obj_invitem.item
+            # qty based on invcontrol - by note/customer
             
+            # Purchase
             if note.notetype_id == 1:
+                qty = qty + int(quantity)
+                #qtyc = qtyc + int(quantity)
+                qtyz=int(quantity)
                 obj_item, create_poitem = POItem.objects.get_or_create(
                     noteitemkey=obj_noteitemkey,
                     notekey=obj_notekey,
@@ -173,7 +230,25 @@ def add_noteitem(request, note):
                     quantity=quantity,
                     weight=weight,
                     cost=cost)
+            
+            # Purchase Return
+            if note.notetype_id == 11:
+                qty = qty - int(quantity)
+                #qtyc = qtyc - int(quantity)
+                qtyz=-int(quantity)
+                obj_item, create_poitem = PRItem.objects.get_or_create(
+                    noteitemkey=obj_noteitemkey,
+                    notekey=obj_notekey,
+                    notetypekey=obj_notetype,
+                    product=obj_product,
+                    quantity=quantity,
+                    weight=weight,
+                    cost=cost)
+            # Sales
             if note.notetype_id == 2:
+                qty = qty - int(quantity)
+                #qtyc = qtyc - int(quantity)
+                qtyz=-int(quantity)
                 obj_item, create_poitem = SOItem.objects.get_or_create(
                     noteitemkey=obj_noteitemkey,
                     notekey=obj_notekey,
@@ -182,6 +257,23 @@ def add_noteitem(request, note):
                     quantity=quantity,
                     weight=weight,
                     cost=cost)
+                obj_item=Noteitem.objects.get(id=s_noteitem)
+
+            # Sales Return
+            if note.notetype_id == 12:
+                qty = qty + int(quantity)
+                #qtyc = qtyc + int(quantity)
+                qtyz=int(quantity)
+                obj_item, create_poitem = SRItem.objects.get_or_create(
+                    noteitemkey=obj_noteitemkey,
+                    notekey=obj_notekey,
+                    product=obj_product,
+                    notetypekey=obj_notetype,
+                    quantity=quantity,
+                    weight=weight,
+                    cost=cost)
+
+            # Customer Orders
             if note.notetype_id == 3:
                 obj_item, create_poitem = COItem.objects.get_or_create(
                     noteitemkey=obj_noteitemkey,
@@ -191,8 +283,13 @@ def add_noteitem(request, note):
                     quantity=quantity,
                     weight=weight,
                     cost=cost)
+
+            # Workshop Issues
             if note.notetype_id == 4:
-                obj_item, create_poitem = WOItem.objects.get_or_create(
+                qty = qty - int(quantity)
+                #qtyc = qtyc - int(quantity)
+                qtyz=-int(quantity)
+                obj_item, create_poitem = WIItem.objects.get_or_create(
                     noteitemkey=obj_noteitemkey,
                     notekey=obj_notekey,
                     product=obj_product,
@@ -201,12 +298,32 @@ def add_noteitem(request, note):
                     weight=weight,
                     cost=cost)
 
-            obj_invitem, create_invitem = Inv.objects.get_or_create(product=obj_product, weight=weight)   
-            obj_invcontrol = InvControl.objects.get_or_create(inv_id=obj_invitem.id, noteitem=obj_item,
-                                                              product=obj_product, weight=weight)
-                               
-            #noteitem = Noteitem.objects.get(id=obj_poitem.noteitem_ptr_id)
-    
+            # Workshop Return
+            if note.notetype_id == 14:
+                qty = qty + int(quantity)
+                #qtyc = qtyc + int(quantity)
+                qtyz=int(quantity)
+                obj_item, create_poitem = WRItem.objects.get_or_create(
+                    noteitemkey=obj_noteitemkey,
+                    notekey=obj_notekey,
+                    product=obj_product,
+                    notetypekey=obj_notetype,
+                    quantity=quantity,
+                    weight=weight,
+                    cost=cost)
+
+
+            obj_invcontrol, create_invcntitem = InvControl.objects.get_or_create(product=obj_product, weight=weight, noteitem=obj_item, inv=obj_invitem)
+            qtyc = obj_invcontrol.inventory
+            qtyc = qtyc + qtyz
+            obj_invitem.item = qty
+
+            obj_invitem.item = qty
+            obj_invitem.save()
+            
+            obj_invcontrol.inventory = qtyc
+            obj_invcontrol.save()
+                
     return render(request, 'note/partials/noteitem.html', {'noteitem': obj_item, 'note': note})
 
 @require_http_methods(['PUT'])

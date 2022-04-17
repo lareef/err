@@ -1,10 +1,22 @@
 from django.db import models
-
-class Client(models.Model):
-    client_name = models.CharField(max_length=100)
+class ClientType(models.Model):
+    client_type = models.CharField(max_length=30)
     
     def __str__(self):
-        return self.client_name
+        return self.client_type
+    
+class Client(models.Model):
+    client = models.CharField(max_length=100)
+    client_type = models.ManyToManyField(ClientType)
+    
+    def __str__(self):
+        return self.client
+    
+class Location(models.Model):
+    location = models.CharField(max_length=30)
+    
+    def __str__(self):
+        return self.location
     
 class Notekey(models.Model):
     notekey = models.CharField(max_length=10, unique=True, null=False)
@@ -31,6 +43,7 @@ class Note(models.Model):
     notetype = models.ForeignKey(Notetype, on_delete=models.CASCADE, related_name="%(class)s")
     is_final = models.BooleanField(default=False)
     status = models.ForeignKey(Status, on_delete=models.CASCADE, related_name="statuses", default=0)
+    location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name="locations", default=1)
     
     def __int__(self):
         return self.id
@@ -58,6 +71,7 @@ class Noteitem(models.Model):
     cost = models.DecimalField(max_digits=6, decimal_places=2)
     is_final = models.BooleanField(default=False)
     created_on = models.DateTimeField(auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
       
     def __int__(self):
         return self.noteitemkey
@@ -74,6 +88,18 @@ class POItem(Noteitem):
     def __int__(self):
         return self.noteitemkey
 
+class PR(Note):
+    typ = models.CharField(max_length=10)
+
+    def __int__(self):
+        return self.notekey
+      
+class PRItem(Noteitem):
+    typ = models.CharField(max_length=10)
+    
+    def __int__(self):
+        return self.noteitemkey
+
 class SO(Note):
     typ = models.CharField(max_length=10)
 
@@ -81,6 +107,18 @@ class SO(Note):
         return self.notekey
       
 class SOItem(Noteitem):
+    typ = models.CharField(max_length=10)
+    
+    def __int__(self):
+        return self.noteitemkey
+
+class SR(Note):
+    typ = models.CharField(max_length=10)
+
+    def __int__(self):
+        return self.notekey
+      
+class SRItem(Noteitem):
     typ = models.CharField(max_length=10)
     
     def __int__(self):
@@ -110,10 +148,35 @@ class WOItem(Noteitem):
     def __int__(self):
         return self.noteitemkey
 
+class WI(Note):
+    typ = models.CharField(max_length=10)
+
+    def __int__(self):
+        return self.notekey
+      
+class WIItem(Noteitem):
+    typ = models.CharField(max_length=10)
+    
+    def __int__(self):
+        return self.noteitemkey
+
+class WR(Note):
+    typ = models.CharField(max_length=10)
+
+    def __int__(self):
+        return self.notekey
+      
+class WRItem(Noteitem):
+    typ = models.CharField(max_length=10)
+    
+    def __int__(self):
+        return self.noteitemkey
+
 class Inv(models.Model):
-    item = models.CharField(max_length=20, default=0)
+    item = models.IntegerField(default=0)
     product = models.ForeignKey(Product, related_name='%(class)s', on_delete=models.CASCADE)
     weight = models.DecimalField(max_digits=6, decimal_places=2)
+    updated_on = models.DateTimeField(auto_now=True)
     
     def __int__(self):
         return self.id
@@ -131,7 +194,9 @@ class Invitem(models.Model):
     
 class InvControl(Invitem):
     noteitem = models.ForeignKey(Noteitem, on_delete=models.CASCADE, related_name="%(class)s")
-    created_at = models.DateTimeField(auto_now_add=True)
+    inventory = models.IntegerField(default=0)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def __int__(self):
         return self.id
