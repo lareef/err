@@ -12,11 +12,9 @@
             <option value="{{ product.id}}">{{ product.product_name }}</option>
           {% endfor %}
       </select>
-
-
       {% if note.notetype_id == 2 %}
       <select
-          id="invlist" name="weight" placeholder="Availablr Items Weight" class="title flex-1 px-4 py-3 bg-gray-200 rounded-xl"/>
+          id="invlist" name="weight" placeholder="Available Items Weight" class="title flex-1 px-4 py-3 bg-gray-200 rounded-xl"
         <option value="">Available Items Weight</option>
       </select>
       {% else %}
@@ -27,17 +25,14 @@
         class="title flex-1 px-4 py-3 bg-gray-200 rounded-xl"
         placeholder="weight"
       />
-      {% endif %}
-
-      <input
-        type="number"
+    {% endif %}
+     <input
+        hx-post="invdata/" hx-target="#message"
+        type="text"
         name="quantity"
-        min="1"
-        max="100"
         class="title flex-1 px-4 py-3 bg-gray-200 rounded-xl"
         placeholder="quantity"
-      />      
-
+      />
       <input
         type="number"
         name="cost"
@@ -45,7 +40,6 @@
         class="title flex-1 px-4 py-3 bg-gray-200 rounded-xl"
         placeholder="cost"
       />
-
       {% if note.status_id == 0 %}
       <button
         hx-post="{% url 'note:add_noteitem' note.id %}"
@@ -70,7 +64,9 @@
       <div class="w-4/5">
         <p class="px-6 text-xs font-medium text-gray-500 uppercase">Title</p>
       </div>
-
+      <div class="w-4/5" id="message">
+        <p class="px-6 text-xs font-medium text-gray-500 uppercase">Error</p>
+      </div>
       <div class="hidden md:block w-1/5 px-6 text-right">
         <p class="text-xs font-medium text-gray-500 uppercase">Actions</p>
       </div>

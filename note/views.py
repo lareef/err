@@ -3,6 +3,10 @@ from django.shortcuts import render
 from django.http.response import HttpResponse
 from django.views.decorators.http import require_http_methods
 
+from django.core.serializers import serialize
+from django.http import JsonResponse
+from json import loads
+
 from .models import Client, Note, Noteitem, Location, Notekey, Notetype, Status, Noteitemkey, PO, POItem, PR, PRItem, Product, SO, SOItem, SR, SRItem, CO, COItem, WI, WR, WIItem, WRItem, Inv, InvControl
 
 def notes(request):
@@ -174,6 +178,18 @@ def invlist(request):
     return render(request, 'note/invlist.html', {'invlist':invlist})
 
 @require_http_methods(['GET', 'POST'])
+def invdata(request):
+    error=None
+    weight = request.POST.get('weight', '')
+    quantity = request.POST.get('quantity', '')
+    if '-' in weight:
+        s_invitem = weight.split('-')[2]
+        obj_invcontrol=InvControl.objects.get(id=s_invitem)
+        if int(quantity) > obj_invcontrol.inventory:
+            error = "Maximum Quantity exceeded"
+    return HttpResponse(error)
+
+@require_http_methods(['GET', 'POST'])
 def edit_noteitem(request, pk):
     #notekey = Notekey.objects.get(notekey=note)
     #obj_notetype = Notetype.objects.get(id=note.notetype)
@@ -200,8 +216,10 @@ def add_noteitem(request, note):
     product = request.POST.get('product', '')
     quantity = request.POST.get('quantity', '')
     cost = request.POST.get('cost', '')
-    weight = request.POST.get('weight', '').split('-')[0]
-    s_noteitem = request.POST.get('weight', '').split('-')[1]
+    weight = request.POST.get('weight', '')
+    if '-' in weight:
+        s_noteitem = weight.split('-')[1]
+        weight = weight.split('-')[0]
 
     if note:
         note = Note.objects.get(id=note)
@@ -229,6 +247,7 @@ def add_noteitem(request, note):
                     product=obj_product,
                     quantity=quantity,
                     weight=weight,
+                    note=note,
                     cost=cost)
             
             # Purchase Return
@@ -243,6 +262,7 @@ def add_noteitem(request, note):
                     product=obj_product,
                     quantity=quantity,
                     weight=weight,
+                    note=note,
                     cost=cost)
             # Sales
             if note.notetype_id == 2:
@@ -256,6 +276,7 @@ def add_noteitem(request, note):
                     notetypekey=obj_notetype,
                     quantity=quantity,
                     weight=weight,
+                    note=note,
                     cost=cost)
                 obj_item=Noteitem.objects.get(id=s_noteitem)
 
@@ -271,6 +292,7 @@ def add_noteitem(request, note):
                     notetypekey=obj_notetype,
                     quantity=quantity,
                     weight=weight,
+                    note=note,
                     cost=cost)
 
             # Customer Orders
@@ -282,6 +304,7 @@ def add_noteitem(request, note):
                     product=obj_product,
                     quantity=quantity,
                     weight=weight,
+                    note=note,
                     cost=cost)
 
             # Workshop Issues
@@ -296,6 +319,7 @@ def add_noteitem(request, note):
                     notetypekey=obj_notetype,
                     quantity=quantity,
                     weight=weight,
+                    note=note,
                     cost=cost)
 
             # Workshop Return
@@ -310,6 +334,7 @@ def add_noteitem(request, note):
                     notetypekey=obj_notetype,
                     quantity=quantity,
                     weight=weight,
+                    note=note,
                     cost=cost)
 
 

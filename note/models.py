@@ -63,6 +63,7 @@ class Product(models.Model):
 
 class Noteitem(models.Model):
     notekey = models.ForeignKey(Notekey, on_delete=models.CASCADE, related_name="%(class)s")
+    note = models.ForeignKey(Note, on_delete=models.CASCADE, related_name="%(class)s")
     noteitemkey = models.ForeignKey(Noteitemkey, on_delete=models.CASCADE, related_name="%(class)s")
     notetypekey = models.ForeignKey(Notetype, on_delete=models.CASCADE, related_name="notetypes")
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='products')
