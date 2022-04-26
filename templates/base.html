@@ -25,10 +25,6 @@
       document.body.addEventListener("htmx:configRequest", (event) => {
         event.detail.headers["X-CSRFToken"] = "{{ csrf_token }}";
       });
-
-      document.body.addEventListener("htmx:afterRequest", (event) => {
-      document.querySelector("input.title").value = "";
-      });
     </script>
   </body>
 </html>

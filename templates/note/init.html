@@ -55,7 +55,11 @@
           <div class="w-4/5">
             <p class="px-6 text-xs font-medium text-gray-500 uppercase">Title</p>
           </div>
-
+          <div class="w-4/5" id="message" hx-swap-oob="true" >
+          {% if message is not None %}
+              <p class ="px-6 text-xs font-medium text-gray-500 uppercase">{{message}}</p>
+          {% endif %}
+          </div>
           <div class="hidden md:block w-1/5 px-6 text-right">
             <p class="text-xs font-medium text-gray-500 uppercase">Actions</p>
           </div>

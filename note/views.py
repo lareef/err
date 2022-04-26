@@ -159,6 +159,7 @@ def noteitems(request, pk):
     #notekey = Notekey.objects.get(notekey=noteref)
     note = Note.objects.get(id=pk)
     invlist=None
+    message=None
 
     products = Product.objects.all()
     noteref = note.notekey_id
@@ -169,25 +170,57 @@ def noteitems(request, pk):
 
     #note = Note.objects.filter(notekey_id=notekey)[:1].get()
 
-    return render(request, 'note/noteitems.html', {'noteref': noteref, 'noteitems': noteitems, 'note': note, 'products': products, 'invlist': invlist})
+    return render(request, 'note/noteitems.html', {'noteref': noteref, 'noteitems': noteitems, 'note': note, 'products': products, 'invlist': invlist, 'message' : message})
 
 @require_http_methods(['GET', 'POST'])
 def invlist(request):
+    message=None
     #invlist = Inv.objects.filter(product_id=request.GET.get('product', ''))
     invlist = InvControl.objects.filter(product_id=request.GET.get('product', ''), inventory__gt =0 )
-    return render(request, 'note/invlist.html', {'invlist':invlist})
+    return render(request, 'note/invlist.html', {'invlist':invlist, 'message' : message})
 
 @require_http_methods(['GET', 'POST'])
 def invdata(request):
-    error=None
+    message=None
     weight = request.POST.get('weight', '')
     quantity = request.POST.get('quantity', '')
     if '-' in weight:
         s_invitem = weight.split('-')[2]
         obj_invcontrol=InvControl.objects.get(id=s_invitem)
         if int(quantity) > obj_invcontrol.inventory:
-            error = "Maximum Quantity exceeded"
-    return HttpResponse(error)
+            message = "Maximum Quantity exceeded"
+    #return HttpResponse(error)
+    return render(request, 'note/partials/message.html', {'message': message})
+
+@require_http_methods(['GET', 'POST'])
+def val_qty(request):
+    message=None
+    weight = request.POST.get('weight', '')
+    qty = request.POST.get('qty', '')
+    if qty=='' or qty==0:
+        message = "Quantity is mandatory!"
+        return render(request, 'note/partials/message.html', {'message': message})
+
+    if '-' in weight:
+        s_invitem = weight.split('-')[2]
+        obj_invcontrol=InvControl.objects.get(id=s_invitem)
+        if int(qty) > obj_invcontrol.inventory:
+            message = "Maximum Quantity Exceeded!"
+    #return HttpResponse(message)
+    return render(request, 'note/partials/message.html', {'message': message})
+
+@require_http_methods(['GET', 'POST'])
+def val_cost(request):
+    message=None
+    weight = request.POST.get('weight', '')
+    cost = request.POST.get('cost', '')
+    if '-' in weight:
+        s_invitem = weight.split('-')[2]
+        obj_invcontrol=InvControl.objects.get(id=s_invitem)
+        if float(cost) <= obj_invcontrol.noteitem.cost:
+            message = "Cost less than purchased!"
+    #return HttpResponse(message)
+    return render(request, 'note/partials/message.html', {'message': message})
 
 @require_http_methods(['GET', 'POST'])
 def edit_noteitem(request, pk):
@@ -212,144 +245,165 @@ def edit_noteitem(request, pk):
 @require_http_methods(['POST'])
 def add_noteitem(request, note):
     noteitem = None
-    #invlist = None
+    obj_item=''
+    message = None
     product = request.POST.get('product', '')
-    quantity = request.POST.get('quantity', '')
+    quantity = request.POST.get('qty', '')
     cost = request.POST.get('cost', '')
     weight = request.POST.get('weight', '')
+    
+    if product=='' or quantity=='' or cost=='' or weight=='' or note==None:
+        message="Incomplete data"
+        #return HttpResponse(message)
+        return render(request, 'note/partials/message.html', {'message': message})
+
     if '-' in weight:
         s_noteitem = weight.split('-')[1]
+        s_invitem = weight.split('-')[2]
         weight = weight.split('-')[0]
+        obj_invcontrol=InvControl.objects.get(id=s_invitem)
+        if float(cost) <= obj_invcontrol.noteitem.cost:
+            message="Invalid Cost data"
+            #return HttpResponse(message)
+            return render(request, 'note/partials/message.html', {'message': message})
+        if int(quantity) > obj_invcontrol.inventory:
+            message = "Maximum Quantity Exceeded!"
+            return render(request, 'note/partials/message.html', {'message': message})
+    
+    note = Note.objects.get(id=note)
+    obj_notekey = Notekey.objects.get(id=note.notekey_id)
+    obj_notetype = Notetype.objects.get(id=note.notetype_id)
+    obj_noteitemkey, create_noteitemkey = Noteitemkey.objects.get_or_create(notekey=obj_notekey)
+        
+    obj_product = Product.objects.get(id=product)
 
-    if note:
-        note = Note.objects.get(id=note)
-        obj_notekey = Notekey.objects.get(id=note.notekey_id)
-        obj_notetype = Notetype.objects.get(id=note.notetype_id)
-        obj_noteitemkey, create_noteitemkey = Noteitemkey.objects.get_or_create(notekey=obj_notekey)
-        if product:
-            obj_product = Product.objects.get(id=product)
+    obj_invitem, create_invitem = Inv.objects.get_or_create(product=obj_product, weight=weight)
 
-            obj_invitem, create_invitem = Inv.objects.get_or_create(product=obj_product, weight=weight)
+    # quantity based on inv
+    qty = obj_invitem.item
+    # qty based on invcontrol - by note/customer
+    
+    # Purchase
+    if note.notetype_id == 1:
+        qty = qty + int(quantity)
+        #qtyc = qtyc + int(quantity)
+        qtyz=int(quantity)
+        obj_item, create_poitem = POItem.objects.get_or_create(
+            noteitemkey=obj_noteitemkey,
+            notekey=obj_notekey,
+            notetypekey=obj_notetype,
+            product=obj_product,
+            quantity=quantity,
+            weight=weight,
+            note=note,
+            cost=cost)
+    
+    # Purchase Return
+    if note.notetype_id == 11:
+        qty = qty - int(quantity)
+        #qtyc = qtyc - int(quantity)
+        qtyz=-int(quantity)
+        obj_item, create_poitem = PRItem.objects.get_or_create(
+            noteitemkey=obj_noteitemkey,
+            notekey=obj_notekey,
+            notetypekey=obj_notetype,
+            product=obj_product,
+            quantity=quantity,
+            weight=weight,
+            note=note,
+            cost=cost)
+        
+    # Sales
+    if note.notetype_id == 2:
+        qty = qty - int(quantity)
+        #qtyc = qtyc - int(quantity)
+        qtyz=-int(quantity)
+        obj_item, create_poitem = SOItem.objects.get_or_create(
+            noteitemkey=obj_noteitemkey,
+            notekey=obj_notekey,
+            product=obj_product,
+            notetypekey=obj_notetype,
+            quantity=quantity,
+            weight=weight,
+            note=note,
+            cost=cost)
+        obj_item=Noteitem.objects.get(id=s_noteitem)
 
-            # quantity based on inv
-            qty = obj_invitem.item
-            # qty based on invcontrol - by note/customer
+    # Sales Return
+    if note.notetype_id == 12:
+        qty = qty + int(quantity)
+        #qtyc = qtyc + int(quantity)
+        qtyz=int(quantity)
+        obj_item, create_poitem = SRItem.objects.get_or_create(
+            noteitemkey=obj_noteitemkey,
+            notekey=obj_notekey,
+            product=obj_product,
+            notetypekey=obj_notetype,
+            quantity=quantity,
+            weight=weight,
+            note=note,
+            cost=cost)
+
+    # Customer Orders
+    if note.notetype_id == 3:
+        obj_item, create_poitem = COItem.objects.get_or_create(
+            noteitemkey=obj_noteitemkey,
+            notekey=obj_notekey,
+            notetypekey=obj_notetype,
+            product=obj_product,
+            quantity=quantity,
+            weight=weight,
+            note=note,
+            cost=cost)
+
+    # Workshop Issues
+    if note.notetype_id == 4:
+        qty = qty - int(quantity)
+        #qtyc = qtyc - int(quantity)
+        qtyz=-int(quantity)
+        obj_item, create_poitem = WIItem.objects.get_or_create(
+            noteitemkey=obj_noteitemkey,
+            notekey=obj_notekey,
+            product=obj_product,
+            notetypekey=obj_notetype,
+            quantity=quantity,
+            weight=weight,
+            note=note,
+            cost=cost)
+        obj_item=Noteitem.objects.get(id=s_noteitem)
+
+    # Workshop Return
+    if note.notetype_id == 14:
+        qty = qty + int(quantity)
+        #qtyc = qtyc + int(quantity)
+        qtyz=int(quantity)
+        obj_item, create_poitem = WRItem.objects.get_or_create(
+            noteitemkey=obj_noteitemkey,
+            notekey=obj_notekey,
+            product=obj_product,
+            notetypekey=obj_notetype,
+            quantity=quantity,
+            weight=weight,
+            note=note,
+            cost=cost)
+
+    if note.notetype_id != 3:
+    
+        obj_invcontrol, create_invcntitem = InvControl.objects.get_or_create(product=obj_product, weight=weight, noteitem=obj_item, defaults={'inv': obj_invitem})
+        qtyc = obj_invcontrol.inventory
+        qtyc = qtyc + qtyz
+        obj_invitem.item = qty
+
+        obj_invitem.item = qty
+        obj_invitem.save()
+        
+        obj_invcontrol.inventory = qtyc
+        obj_invcontrol.save()
+    
+    message='Item successfully added'
             
-            # Purchase
-            if note.notetype_id == 1:
-                qty = qty + int(quantity)
-                #qtyc = qtyc + int(quantity)
-                qtyz=int(quantity)
-                obj_item, create_poitem = POItem.objects.get_or_create(
-                    noteitemkey=obj_noteitemkey,
-                    notekey=obj_notekey,
-                    notetypekey=obj_notetype,
-                    product=obj_product,
-                    quantity=quantity,
-                    weight=weight,
-                    note=note,
-                    cost=cost)
-            
-            # Purchase Return
-            if note.notetype_id == 11:
-                qty = qty - int(quantity)
-                #qtyc = qtyc - int(quantity)
-                qtyz=-int(quantity)
-                obj_item, create_poitem = PRItem.objects.get_or_create(
-                    noteitemkey=obj_noteitemkey,
-                    notekey=obj_notekey,
-                    notetypekey=obj_notetype,
-                    product=obj_product,
-                    quantity=quantity,
-                    weight=weight,
-                    note=note,
-                    cost=cost)
-            # Sales
-            if note.notetype_id == 2:
-                qty = qty - int(quantity)
-                #qtyc = qtyc - int(quantity)
-                qtyz=-int(quantity)
-                obj_item, create_poitem = SOItem.objects.get_or_create(
-                    noteitemkey=obj_noteitemkey,
-                    notekey=obj_notekey,
-                    product=obj_product,
-                    notetypekey=obj_notetype,
-                    quantity=quantity,
-                    weight=weight,
-                    note=note,
-                    cost=cost)
-                obj_item=Noteitem.objects.get(id=s_noteitem)
+    return render(request, 'note/partials/noteitem.html', {'noteitem': obj_item, 'note': note, 'message': message})
 
-            # Sales Return
-            if note.notetype_id == 12:
-                qty = qty + int(quantity)
-                #qtyc = qtyc + int(quantity)
-                qtyz=int(quantity)
-                obj_item, create_poitem = SRItem.objects.get_or_create(
-                    noteitemkey=obj_noteitemkey,
-                    notekey=obj_notekey,
-                    product=obj_product,
-                    notetypekey=obj_notetype,
-                    quantity=quantity,
-                    weight=weight,
-                    note=note,
-                    cost=cost)
-
-            # Customer Orders
-            if note.notetype_id == 3:
-                obj_item, create_poitem = COItem.objects.get_or_create(
-                    noteitemkey=obj_noteitemkey,
-                    notekey=obj_notekey,
-                    notetypekey=obj_notetype,
-                    product=obj_product,
-                    quantity=quantity,
-                    weight=weight,
-                    note=note,
-                    cost=cost)
-
-            # Workshop Issues
-            if note.notetype_id == 4:
-                qty = qty - int(quantity)
-                #qtyc = qtyc - int(quantity)
-                qtyz=-int(quantity)
-                obj_item, create_poitem = WIItem.objects.get_or_create(
-                    noteitemkey=obj_noteitemkey,
-                    notekey=obj_notekey,
-                    product=obj_product,
-                    notetypekey=obj_notetype,
-                    quantity=quantity,
-                    weight=weight,
-                    note=note,
-                    cost=cost)
-
-            # Workshop Return
-            if note.notetype_id == 14:
-                qty = qty + int(quantity)
-                #qtyc = qtyc + int(quantity)
-                qtyz=int(quantity)
-                obj_item, create_poitem = WRItem.objects.get_or_create(
-                    noteitemkey=obj_noteitemkey,
-                    notekey=obj_notekey,
-                    product=obj_product,
-                    notetypekey=obj_notetype,
-                    quantity=quantity,
-                    weight=weight,
-                    note=note,
-                    cost=cost)
-
-
-            obj_invcontrol, create_invcntitem = InvControl.objects.get_or_create(product=obj_product, weight=weight, noteitem=obj_item, inv=obj_invitem)
-            qtyc = obj_invcontrol.inventory
-            qtyc = qtyc + qtyz
-            obj_invitem.item = qty
-
-            obj_invitem.item = qty
-            obj_invitem.save()
-            
-            obj_invcontrol.inventory = qtyc
-            obj_invcontrol.save()
-                
-    return render(request, 'note/partials/noteitem.html', {'noteitem': obj_item, 'note': note})
 
 @require_http_methods(['PUT'])
 def update_noteitem(request, pk):

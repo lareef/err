@@ -69,7 +69,7 @@ class Noteitem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='products')
     weight = models.DecimalField(max_digits=6, decimal_places=2)
     quantity = models.PositiveSmallIntegerField()
-    cost = models.DecimalField(max_digits=6, decimal_places=2)
+    cost = models.DecimalField(max_digits=15, decimal_places=2)
     is_final = models.BooleanField(default=False)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
@@ -201,3 +201,9 @@ class InvControl(Invitem):
 
     def __int__(self):
         return self.id
+    
+class WorkInvControl(models.Model):
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    inventory = models.IntegerField(default=0)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
