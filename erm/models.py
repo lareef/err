@@ -61,10 +61,11 @@ class PurchaseOrder(models.Model):
     purchase_order_cost = models.DecimalField(max_digits=9, default=0, decimal_places=2)
 
 class PurchaseOrderItem(models.Model):
-    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    purchase_order_item_weight = models.DecimalField(max_digits=5, decimal_places=2)
-    purchase_order_item_cost = models.DecimalField(max_digits=9, decimal_places=2)
+     id = models.IntegerField(primary_key=True)
+     purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE)
+     product = models.ForeignKey(Product, on_delete=models.PROTECT)
+     purchase_order_item_weight = models.DecimalField(max_digits=5, decimal_places=2)
+     purchase_order_item_cost = models.DecimalField(max_digits=9, decimal_places=2)
 
 class CustomerOrder(models.Model):
     customer_order_id = models.IntegerField(primary_key=True)
