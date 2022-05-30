@@ -8,7 +8,7 @@ class SignupView(generic.CreateView):
     form_class = CustomUserCreationForm
 
     def get_success_url(self):
-        return reverse('login')
+        return reverse('util:login')
 
 class LandingPageView(TemplateView):
     template_name = 'landing_page.html'

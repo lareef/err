@@ -18,12 +18,13 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
-admin.site.site_header = 'ERP Admin'
+admin.site.site_header = 'ERM Admin'
 admin.site.index_title = 'Admin'
-admin.site.site_title = 'ERP Admin'
+admin.site.site_title = 'ERM Admin'
 
 urlpatterns = [
     path('', include('util.urls')),
+    #path('login/', include('util.urls'), name='login'),
     path('erm/', include('erm.urls')),
     path('note/', include('note.urls')),
     path('admin/', admin.site.urls),
