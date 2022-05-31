@@ -24,7 +24,6 @@ admin.site.site_title = 'ERM Admin'
 
 urlpatterns = [
     path('', include('util.urls')),
-    #path('login/', include('util.urls'), name='login'),
     path('erm/', include('erm.urls')),
     path('note/', include('note.urls')),
     path('admin/', admin.site.urls),

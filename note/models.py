@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.db import models
 class ClientType(models.Model):
     client_type = models.CharField(max_length=30)
@@ -55,11 +56,30 @@ class Noteitemkey(models.Model):
     def __str__(self):
         return self.noteitemkey
 
+class Carat(models.Model):
+    carat = models.SmallIntegerField()
+    
+    def __int__(self):
+        #return self.carat
+        return "{}, {}".format(self.pk, self.carat)
+    
 class Product(models.Model):
     product_name = models.CharField(max_length=100)
-    
+    carat = models.ForeignKey(Carat, on_delete=models.CASCADE)
+    buy_rate = models.DecimalField(max_digits=7, decimal_places=2, default=-1)
+    sell_rate = models.DecimalField(max_digits=7, decimal_places=2, default=1)
+
     def __str__(self):
         return self.product_name
+
+class Cost(models.Model):
+    carat = models.ForeignKey(Carat, on_delete=models.CASCADE)
+    date = models.DateTimeField(default=datetime.now)
+    cost = models.DecimalField(max_digits=15, decimal_places=2)
+    created_on = models.DateTimeField(auto_now_add=True)
+    
+    def __int__(self):
+        return self.cost
 
 class Noteitem(models.Model):
     notekey = models.ForeignKey(Notekey, on_delete=models.CASCADE, related_name="%(class)s")

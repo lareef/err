@@ -13,6 +13,6 @@ class SignupView(generic.CreateView):
 class LandingPageView(TemplateView):
     template_name = 'landing_page.html'
     
-def hello(request):
-    print("IP Address for debug-toolbar: " + request.META['REMOTE_ADDR'])
-    return render(request, 'hello.html')
+# def hello(request):
+#     print("IP Address for debug-toolbar: " + request.META['REMOTE_ADDR'])
+#     return render(request, 'hello.html')
