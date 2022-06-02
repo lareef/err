@@ -9,9 +9,12 @@ class User(AbstractUser):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    #email = models.EmailField('email address', unique=True)
+    #USERNAME_FIELD = 'email'
+    #REQUIRED_FIELDS = ['username', 'email']
 
     def __str__(self):
-        return self.user.username
+        return self.user.email
 
 def post_user_created_signal(sender, instance, created, **kwargs):
     print ('sender - ', sender)
