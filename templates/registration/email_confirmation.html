@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load tailwind_filters %}
+
+{% block content %}
+    <div class='max-w-lg mx-auto'>
+        <h1 class='text-4xl text-gray-800'>Email confirmation</h1>
+    </div >
+
+    <div class='py-5 border-t border-gray-200 mt-5'>
+        We have sent an email to your email address.
+
+        Please confirm your email address to complete the registration
+        <p class='hover:text-blue-500 mt-3' >
+            <a href="{% url 'util:login' %}"> to login</a>
+        </p>
+    </div>
+{% endblock content %}

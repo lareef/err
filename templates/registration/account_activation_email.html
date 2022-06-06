@@ -1,0 +1,10 @@
+{% autoescape off %}
+
+Subject: ERM Enterprise Resource Management - Registration
+
+Hi {{ user.username }},
+
+Please click on the link below to confirm your registration:
+
+http://{{ domain }}{% url 'util:activate' uidb64=uid token=token %}
+{% endautoescape %}

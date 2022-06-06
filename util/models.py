@@ -9,12 +9,19 @@ class User(AbstractUser):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    email_confirmed = models.BooleanField(default=False)
     #email = models.EmailField('email address', unique=True)
     #USERNAME_FIELD = 'email'
     #REQUIRED_FIELDS = ['username', 'email']
 
     def __str__(self):
         return self.user.email
+
+@receiver(post_save, sender=User)
+def update_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+        #instance.profile.save()
 
 def post_user_created_signal(sender, instance, created, **kwargs):
     print ('sender - ', sender)
@@ -30,4 +37,4 @@ def default_to_non_active(sender, instance, created, **kwargs):
         instance.is_active = False
         instance.save()
 
-post_save.connect(post_user_created_signal, sender=User)
+# post_save.connect(post_user_created_signal, sender=User)
