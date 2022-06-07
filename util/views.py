@@ -87,14 +87,13 @@ class ActivateAccount(View):
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
             user = None
         if user is not None and account_activation_token.check_token(user, token):
-            user.is_active = True
             profile.email_confirmed = True
             profile.save()
             login(request, user)
             return render(request, 'registration/email_confirmation_done.html')
         else:
             messages.warning(request, ('Activation link is invalid !'))
-            return redirect('util:landing-page')
+            return redirect('util:login')
         
 def activate(request, uidb64, token):  
     User = get_user_model()  
@@ -113,4 +112,4 @@ def activate(request, uidb64, token):
         #return HttpResponse('Thank you for your email confirmation. Now you can login your account.')
         return render(request, 'registration/email_confirmation_done.html')
     else:  
-        return redirect('util:landing-page')
+        return redirect('util:login')
