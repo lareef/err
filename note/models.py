@@ -46,8 +46,10 @@ class Note(models.Model):
     status = models.ForeignKey(Status, on_delete=models.CASCADE, related_name="statuses", default=0)
     location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name="locations", default=1)
     
-    def __int__(self):
-        return self.id
+    #def __int__(self):
+    #    return self.id
+    def __str__(self):
+        return str(self.notekey)
 
 class Noteitemkey(models.Model):
     notekey = models.ForeignKey(Notekey, on_delete=models.CASCADE, related_name='notekeys')
@@ -57,15 +59,14 @@ class Noteitemkey(models.Model):
         return self.noteitemkey
 
 class Carat(models.Model):
-    carat = models.SmallIntegerField()
+    carat = models.SmallIntegerField(default=21)
     
-    def __int__(self):
-        #return self.carat
-        return "{}, {}".format(self.pk, self.carat)
+    def __str__(self):
+        return str(self.carat)  
     
 class Product(models.Model):
     product_name = models.CharField(max_length=100)
-    carat = models.ForeignKey(Carat, on_delete=models.CASCADE)
+    carat = models.ForeignKey(Carat, on_delete=models.CASCADE, default=1)
     buy_rate = models.DecimalField(max_digits=7, decimal_places=2, default=-1)
     sell_rate = models.DecimalField(max_digits=7, decimal_places=2, default=1)
 
@@ -73,13 +74,13 @@ class Product(models.Model):
         return self.product_name
 
 class Cost(models.Model):
-    carat = models.ForeignKey(Carat, on_delete=models.CASCADE)
+    carat = models.ForeignKey(Carat, on_delete=models.CASCADE, default=1)
     date = models.DateTimeField(default=datetime.now)
     cost = models.DecimalField(max_digits=15, decimal_places=2)
     created_on = models.DateTimeField(auto_now_add=True)
     
-    def __int__(self):
-        return self.cost
+    def __str__(self):
+        return "{} {} {}".format( self.carat, self.date, self.cost)
 
 class Noteitem(models.Model):
     notekey = models.ForeignKey(Notekey, on_delete=models.CASCADE, related_name="%(class)s")
@@ -89,13 +90,19 @@ class Noteitem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='products')
     weight = models.DecimalField(max_digits=6, decimal_places=2)
     quantity = models.PositiveSmallIntegerField()
-    cost = models.DecimalField(max_digits=15, decimal_places=2)
+    costid=models.PositiveSmallIntegerField()
+    prate = models.DecimalField(max_digits=15, decimal_places=2)
+    pcost = models.DecimalField(max_digits=15, decimal_places=2)
+    icost = models.DecimalField(max_digits=15, decimal_places=2)
     is_final = models.BooleanField(default=False)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
       
-    def __int__(self):
-        return self.noteitemkey
+    #def __int__(self):
+    #    return self.noteitemkey
+    
+    def __str__(self):
+        return str(self.notekey)
     
 class PO(Note):
     typ = models.CharField(max_length=10)
@@ -224,6 +231,6 @@ class InvControl(Invitem):
     
 class WorkInvControl(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    inventory = models.IntegerField(default=0)
+    inventory = models.DecimalField(max_digits=12, decimal_places=2)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)

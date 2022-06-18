@@ -6,8 +6,9 @@ from django.views.decorators.http import require_http_methods
 from django.core.serializers import serialize
 from django.http import JsonResponse
 from json import loads
+from decimal import Decimal
 
-from .models import Client, Note, Noteitem, Location, Notekey, Notetype, Status, Noteitemkey, PO, POItem, PR, PRItem, Product, SO, SOItem, SR, SRItem, CO, COItem, WI, WR, WIItem, WRItem, Inv, InvControl
+from .models import Client, Cost, Note, Noteitem, Location, Notekey, Notetype, Status, Noteitemkey, PO, POItem, PR, PRItem, Product, SO, SOItem, SR, SRItem, CO, COItem, WI, WR, WIItem, WRItem, Inv, InvControl, WorkInvControl
 
 def notes(request):
     
@@ -173,11 +174,27 @@ def noteitems(request, pk):
     return render(request, 'note/noteitems.html', {'noteref': noteref, 'noteitems': noteitems, 'note': note, 'products': products, 'invlist': invlist, 'message' : message})
 
 @require_http_methods(['GET', 'POST'])
-def invlist(request):
+def invlist(request, pk):
     message=None
+    note = Note.objects.get(id=pk)
     #invlist = Inv.objects.filter(product_id=request.GET.get('product', ''))
+    product=request.GET.get('product', '')
+    prodcost=request.GET.get('prodcost', '')
+    weight=request.GET.get('weight', '')
+    qty=request.GET.get('qty', '')
+    if weight=='':
+        weight=1
+    if qty=='':
+        qty=1
+    obj_product=Product.objects.get(pk=product)
     invlist = InvControl.objects.filter(product_id=request.GET.get('product', ''), inventory__gt =0 )
-    return render(request, 'note/invlist.html', {'invlist':invlist, 'message' : message})
+    cost=Cost.objects.filter(carat_id=obj_product.carat_id).first()
+    rate=obj_product.sell_rate
+    if note.notetype.id == 1:
+        rate=obj_product.buy_rate
+    prodcost=cost.cost+(cost.cost/100*rate)
+    icost=prodcost*qty*weight
+    return render(request, 'note/invlist.html', {'note': note, 'invlist':invlist, 'message' : message, 'prodcost' : prodcost, 'weight': weight, 'qty': qty, 'icost': icost})
 
 @require_http_methods(['GET', 'POST'])
 def invdata(request):
@@ -223,6 +240,96 @@ def val_cost(request):
     return render(request, 'note/partials/message.html', {'message': message})
 
 @require_http_methods(['GET', 'POST'])
+def icost(request, pk):
+    note = Note.objects.get(id=pk)
+    message=None
+    product=request.POST.get('product', '')
+    prodcost=request.POST.get('prodcost', '')
+    weight = request.POST.get('weight', '')
+    icost = request.POST.get('icost', '')
+    qty = request.POST.get('qty', '')
+
+    if weight=='' or weight==0:
+        weight=1
+    if qty=='' or qty==0:
+        qty=1
+        
+    if qty=='' or qty==0:
+        message = "Quantity is mandatory!"
+        return render(request, 'note/partials/message.html', {'message': message})
+
+
+
+    if '-' in weight:
+        s_invitem = weight.split('-')[2]
+        wgt = weight.split('-')[0]
+        obj_invcontrol=InvControl.objects.get(id=s_invitem)
+        if int(qty) > obj_invcontrol.inventory:
+            message = "Maximum Quantity Exceeded!"
+        #if float(icost) <= obj_invcontrol.noteitem.cost:
+        #    message = "Cost less than purchased!"
+    
+    #weight=float(weight)
+    #qty=int(qty)
+    obj_product=Product.objects.get(pk=product)
+    invlist = InvControl.objects.filter(product_id=product, inventory__gt =0 )
+    cost=Cost.objects.filter(carat_id=obj_product.carat_id).first()
+    rate=obj_product.sell_rate
+    if note.notetype.id == 1:
+        rate=obj_product.buy_rate
+        prodcost=cost.cost+(cost.cost/100*rate)
+    if note.notetype.id == 2:
+        rate=obj_product.sell_rate
+        prodcost=cost.cost+(cost.cost/100*rate)
+    icost=prodcost*int(qty)*Decimal(wgt) 
+    return render(request, 'note/invlist.html', {'note': note, 'weight': weight, 'invlist':invlist, 'message' : message, 'prodcost' : prodcost, 'qty': qty, 'icost': icost})
+        
+
+@require_http_methods(['GET', 'POST'])
+def val_icost(request, pk):
+    note = Note.objects.get(id=pk)
+    message=None
+    product=request.POST.get('product', '')
+    prodcost=request.POST.get('prodcost', '')
+    wgt = weight = request.POST.get('weight', '')
+    icost = request.POST.get('icost', '')
+    qty = request.POST.get('qty', '')
+
+    if weight=='' or weight==0:
+        weight=1
+    if qty=='' or qty==0:
+        qty=1
+        
+    if qty=='' or qty==0:
+        message = "Quantity is mandatory!"
+        return render(request, 'note/partials/message.html', {'message': message})
+
+    if '-' in weight:
+        s_invitem = weight.split('-')[2]
+        wgt = weight.split('-')[0]
+        obj_invcontrol=InvControl.objects.get(id=s_invitem)
+        if int(qty) > obj_invcontrol.inventory:
+            message = "Maximum Quantity Exceeded!"
+        #if float(icost) <= obj_invcontrol.noteitem.cost:
+        #    message = "Cost less than purchased!"
+    
+    #weight=float(weight)
+    #qty=int(qty)
+    obj_product=Product.objects.get(pk=product)
+    #invlist = InvControl.objects.filter(product_id=product, inventory__gt =0 )
+    cost=Cost.objects.filter(carat_id=obj_product.carat_id).first()
+    rate=obj_product.sell_rate
+    if note.notetype.id == 1:
+        rate=obj_product.buy_rate
+        prodcost=cost.cost+(cost.cost/100*rate)
+    if note.notetype.id == 2:
+        rate=obj_product.sell_rate
+        prodcost=cost.cost+(cost.cost/100*rate)
+    icost=Decimal(prodcost)*int(qty)*Decimal(wgt) 
+    return render(request, 'note/partials/icost.html', {'message' : message, 'prodcost' : prodcost, 'qty': qty, 'icost': icost})
+
+
+@require_http_methods(['GET', 'POST'])
 def edit_noteitem(request, pk):
     #notekey = Notekey.objects.get(notekey=note)
     #obj_notetype = Notetype.objects.get(id=note.notetype)
@@ -247,14 +354,14 @@ def add_noteitem(request, note):
     noteitem = None
     obj_item=''
     message = None
-    product = request.POST.get('product', '')
-    quantity = request.POST.get('qty', '')
-    cost = request.POST.get('cost', '')
+    product=request.POST.get('product', '')
+    prodcost=request.POST.get('prodcost', '')
     weight = request.POST.get('weight', '')
+    #icost = request.POST.get('icost', '')
+    quantity = request.POST.get('qty', '')
     
-    if product=='' or quantity=='' or cost=='' or weight=='' or note==None:
+    if product=='' or prodcost=='' or quantity=='' or weight=='' or note==None:
         message="Incomplete data"
-        #return HttpResponse(message)
         return render(request, 'note/partials/message.html', {'message': message})
 
     if '-' in weight:
@@ -262,20 +369,43 @@ def add_noteitem(request, note):
         s_invitem = weight.split('-')[2]
         weight = weight.split('-')[0]
         obj_invcontrol=InvControl.objects.get(id=s_invitem)
-        if float(cost) <= obj_invcontrol.noteitem.cost:
-            message="Invalid Cost data"
+        #if float(icost) <= obj_invcontrol.noteitem.cost:
+            #message="Invalid Cost data"
             #return HttpResponse(message)
-            return render(request, 'note/partials/message.html', {'message': message})
+            #return render(request, 'note/partials/message.html', {'message': message})
         if int(quantity) > obj_invcontrol.inventory:
             message = "Maximum Quantity Exceeded!"
             return render(request, 'note/partials/message.html', {'message': message})
-    
+
     note = Note.objects.get(id=note)
+    obj_product=Product.objects.get(pk=product)
+    #invlist = InvControl.objects.filter(product_id=product, inventory__gt =0 )
+    cost=Cost.objects.filter(carat_id=obj_product.carat_id).first()
+    rate=obj_product.sell_rate
+
+    if cost=='' or rate=='':
+        message = "Product cost or rate unavailable !"
+        return render(request, 'note/partials/message.html', {'message': message})
+
+    if note.notetype.id == 1:
+        rate=obj_product.buy_rate
+
+    if note.notetype.id == 2:
+        rate=obj_product.sell_rate
+    
+    costid = cost.id
+    # product rate
+    prate=cost.cost+(cost.cost/100*rate)
+    # product cost
+    pcost=prate*Decimal(weight)
+    # total cost
+    icost=pcost*int(quantity)
+
     obj_notekey = Notekey.objects.get(id=note.notekey_id)
     obj_notetype = Notetype.objects.get(id=note.notetype_id)
     obj_noteitemkey, create_noteitemkey = Noteitemkey.objects.get_or_create(notekey=obj_notekey)
         
-    obj_product = Product.objects.get(id=product)
+    #obj_product = Product.objects.get(id=product)
 
     obj_invitem, create_invitem = Inv.objects.get_or_create(product=obj_product, weight=weight)
 
@@ -296,7 +426,10 @@ def add_noteitem(request, note):
             quantity=quantity,
             weight=weight,
             note=note,
-            cost=cost)
+            costid=costid,
+            prate=prate,
+            pcost=pcost,
+            icost=icost)
     
     # Purchase Return
     if note.notetype_id == 11:
@@ -311,7 +444,10 @@ def add_noteitem(request, note):
             quantity=quantity,
             weight=weight,
             note=note,
-            cost=cost)
+            costid=costid,
+            prate=prate,
+            pcost=pcost,
+            icost=icost)
         
     # Sales
     if note.notetype_id == 2:
@@ -326,7 +462,10 @@ def add_noteitem(request, note):
             quantity=quantity,
             weight=weight,
             note=note,
-            cost=cost)
+            costid=costid,
+            prate=prate,
+            pcost=pcost,
+            icost=icost)
         obj_item=Noteitem.objects.get(id=s_noteitem)
 
     # Sales Return
@@ -342,7 +481,10 @@ def add_noteitem(request, note):
             quantity=quantity,
             weight=weight,
             note=note,
-            cost=cost)
+            costid=costid,
+            prate=prate,
+            pcost=pcost,
+            icost=icost)
 
     # Customer Orders
     if note.notetype_id == 3:
@@ -354,13 +496,16 @@ def add_noteitem(request, note):
             quantity=quantity,
             weight=weight,
             note=note,
-            cost=cost)
+            costid=costid,
+            prate=prate,
+            pcost=pcost,
+            icost=icost)
 
     # Workshop Issues
     if note.notetype_id == 4:
         qty = qty - int(quantity)
-        #qtyc = qtyc - int(quantity)
         qtyz=-int(quantity)
+        wtga = Decimal(weight) * int(quantity)
         obj_item, create_poitem = WIItem.objects.get_or_create(
             noteitemkey=obj_noteitemkey,
             notekey=obj_notekey,
@@ -369,14 +514,17 @@ def add_noteitem(request, note):
             quantity=quantity,
             weight=weight,
             note=note,
-            cost=cost)
+            costid=costid,
+            prate=prate,
+            pcost=pcost,
+            icost=icost)
         obj_item=Noteitem.objects.get(id=s_noteitem)
 
     # Workshop Return
     if note.notetype_id == 14:
         qty = qty + int(quantity)
-        #qtyc = qtyc + int(quantity)
         qtyz=int(quantity)
+        wtga = - Decimal(weight) * int(quantity)
         obj_item, create_poitem = WRItem.objects.get_or_create(
             noteitemkey=obj_noteitemkey,
             notekey=obj_notekey,
@@ -385,7 +533,10 @@ def add_noteitem(request, note):
             quantity=quantity,
             weight=weight,
             note=note,
-            cost=cost)
+            costid=costid,
+            prate=prate,
+            pcost=pcost,
+            icost=icost)
 
     if note.notetype_id != 3:
     
@@ -399,6 +550,15 @@ def add_noteitem(request, note):
         
         obj_invcontrol.inventory = qtyc
         obj_invcontrol.save()
+    
+    if note.notetype_id == 4 or note.notetype_id == 14:
+        
+        obj_workinvcontrol, create_invcntitem = WorkInvControl.objects.get_or_create(client_id=note.client_id)
+        wtgc = obj_workinvcontrol.inventory
+        wtgc = wtgc + wtga
+        obj_workinvcontrol.inventory = wtgc
+
+        obj_workinvcontrol.save()
     
     message='Item successfully added'
             

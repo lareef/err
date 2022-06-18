@@ -6,44 +6,63 @@
       </label>
 
       <select
-          id="productlist" name="product" hx-trigger="change" hx-get="invlist/" hx-target="#invlist" placeholder="Product" class="title flex-1 px-4 py-3 bg-gray-200 rounded-xl"/>
+          id="productlist" name="product" hx-trigger="change" hx-get="invlist/{{ note.id }}/" hx-target="#invlist" placeholder="Product" class="title flex-1 px-4 py-3 bg-gray-200 rounded-xl"/>
           <option value="">Product</option>
           {% for product in products %}
-            <option value="{{ product.id}}">{{ product.product_name }}</option>
+            <option value="{{ product.id}}">{{ product.product_name }} {{ product.carat.carat }}</option>
           {% endfor %}
       </select>
       {% if note.notetype_id == 2 or note.notetype_id == 4 %}
       <select
-          id="invlist" name="weight" placeholder="Available Items Weight" class="weight flex-1 px-4 py-3 bg-gray-200 rounded-xl"/>
+          id="invlist" name="weight" placeholder="Available Items Weight" class="weight flex-1 px-4 py-3 bg-gray-200 rounded-xl"
+          hx-trigger="change" hx-post="icost/{{ note.id }}/" hx-target="#prodcost"/>
         <option value="">Available Items Weight</option>
       </select>
       {% else %}
       <input
-        id="invlist"
+       id="invlist"
+        hx-trigger="change" hx-post="icost/{{ note.id }}/" hx-target="#invlist"
         type="number"
         name="weight"
+        value="1.00"
         step=".01"
-        class="title flex-1 px-4 py-3 bg-gray-200 rounded-xl"
+        class="weight flex-1 px-4 py-3 bg-gray-200 rounded-xl"
         placeholder="weight"
       />
       {% endif %}
-      
+ 
       <input
-        hx-post="val_cost/" hx-target="#message"
+      id="prodcost"
+        hx-trigger="change" hx-post="icost/{{ note.notetype.id }}/" hx-target="#invlist"
         type="number"
-        name="cost"
+        name="prodcost"
+        value="{{prodcost}}"
         step=".01"
-        class="cost flex-1 px-4 py-3 bg-gray-200 rounded-xl"
-        placeholder="cost"
-      />     
-      
+        class="prodcost flex-1 px-4 py-3 bg-gray-200 rounded-xl"
+        placeholder="{{prodcost}}"
+      /> 
+
+
       <input
-        hx-post="val_qty/" hx-target="#message"
+      id="qty"
+        hx-trigger="change" hx-post="icost/{{ note.notetype.id }}/" hx-target="#invlist"
         type="number"
         name="qty"
+        value="1"
         class="qty flex-1 px-4 py-3 bg-gray-200 rounded-xl"
         placeholder="qty"
       />
+
+      <input
+      id="icost"
+        hx-trigger="change" hx-post="icost/{{ note.notetype.id }}/" hx-target="#invlist"
+        type="number"
+        name="icost"
+        value="{{icost}}"
+        class="cost flex-1 px-4 py-3 bg-gray-200 rounded-xl"
+        placeholder="{{icost}}"
+        disabled="true"
+      /> 
 
       {% if note.status_id == 0 %}
       <button

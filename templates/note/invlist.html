@@ -1,4 +1,52 @@
-          <option value="">Available items Weight</option>
+    {% if invlist %}
+          <option value={{weight}}>"{{weight}}"</option>
           {% for inv in invlist %}
-            <option value="{{ inv.weight}}-{{ inv.noteitem_id }}-{{inv.id}}">{{ inv.noteitem_id }} - {{ inv.noteitem.cost }} - {{ inv.noteitem.created_on }} - {{ inv.noteitem.note.client }} - {{ inv.weight }}</option>
+            <option value="{{ inv.weight}}-{{ inv.noteitem_id }}-{{inv.id}}">{{ inv.noteitem_id }} - {{ inv.noteitem.icost }} - {{ inv.noteitem.created_on }} - {{ inv.noteitem.note.client }} - {{ inv.weight }}</option>
+            {% comment %} <option value="{{ inv.noteitem_id }} - {{inv.id}} - {{ inv.noteitem.icost }} - {{ inv.noteitem.created_on }} - {{ inv.noteitem.note.client }} - {{ inv.weight }}">{{ inv.noteitem_id }} - {{ inv.noteitem.icost }} - {{ inv.noteitem.created_on }} - {{ inv.noteitem.note.client }} - {{ inv.weight }}</option> {% endcomment %}
           {% endfor %}
+    {% else %}
+      <input
+        id="invlist"
+        hx-trigger="change" hx-post="icost/{{ note.id }}/" hx-target="#prodcost"
+        hx-swap-oob="true"
+        type="number"
+        name="weight"
+        value="{{weight}}"
+        step=".01"
+        class="weight flex-1 px-4 py-3 bg-gray-200 rounded-xl"
+        placeholder="{{weight}}"
+      />
+      {% endif %} 
+
+      <input
+      id="prodcost"
+        hx-trigger="change" hx-post="icost/{{ note.id }}/" hx-target="#invlist"
+        hx-swap-oob="true"
+        type="number"
+        name="prodcost"
+        value="{{prodcost}}"
+        step="1.00"
+        class="cost flex-1 px-4 py-3 bg-gray-200 rounded-xl"
+        placeholder="{{prodcost}}"
+      />
+
+      <input
+      id="qty"
+        hx-trigger="change" hx-post="icost/{{ note.id }}/" hx-target="#invlist"
+        hx-swap-oob="true"
+        type="number"
+        value="{{qty}}"
+        name="qty"
+        class="qty flex-1 px-4 py-3 bg-gray-200 rounded-xl"
+        placeholder="{{qty}}"
+      />
+
+      <input
+      id="icost" hx-swap-oob="true"
+        type="number"
+        name="icost"
+        value="{{icost}}"
+        disabled="true"
+        class="icost flex-1 px-4 py-3 bg-gray-200 rounded-xl"
+        placeholder="{{icost}}"
+      />
