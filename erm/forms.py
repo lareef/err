@@ -1,21 +1,36 @@
 import collections
 from dataclasses import fields
+from datetime import datetime
 from django import forms
+from .customdatetime import minimalSplitDateTimeMultiWidget
 
 from util.models import UserProfile
-from .models import Product, PurchaseOrder, PurchaseOrderItem
+from note.models import Product, Cost
+from .models import PurchaseOrder, PurchaseOrderItem
 from django.forms.models import (
     modelform_factory,
     modelformset_factory,
     inlineformset_factory    
 )
 
-class ProductModelForm(forms.Form):
+class ProductModelForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = (
-            'collection', 'description', 'reorder_level', 
-        )
+        template_name = "erm/product_list.html"
+        fields = [
+            'carat', 'product_name', 'buy_rate', 'sell_rate' 
+        ]
+
+class CostModelForm(forms.ModelForm):
+    
+    date = forms.DateTimeField(widget=minimalSplitDateTimeMultiWidget())
+
+    class Meta:
+        model = Cost
+        template_name = "erm/cost_list.html"
+        fields = [
+            'carat', 'date', 'cost' 
+        ]
 
 class POForm(forms.ModelForm):
     class Meta:

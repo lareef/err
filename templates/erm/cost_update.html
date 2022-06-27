@@ -5,15 +5,15 @@
     <div class="max-w-lg mx-auto">
       <div class="max-w-lg mx-auto">
         <h1 class="text-2xl text-gray-800">
-          Product - {{ product.product_name }}
+          Cost - {{ cost.carat }}
         </h1>
       </div>
       <div class="py-5 border-b border-gray-200">
         <a
           class="hover:text-blue-500"
-          href="{% url 'erm:product-list' %}"
+          href="{% url 'erm:cost-list' %}"
           rel="noopener noreferrer"
-          >Product List</a
+          >Cost List</a
         >
       </div>
       <form method="post" enctype="multipart/form-data" class="mt-2">

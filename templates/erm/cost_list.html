@@ -2,13 +2,13 @@
 
 <section class="text-gray-600 body-font">
   <div class="container px-5 py-2 mx-auto">
-    <a href="{% url 'erm:product-create' %}">Create Product</a>
+    <a href="{% url 'erm:cost-create' %}">Create Product</a>
     <hr />
     <div class="flex flex-col text-center w-full mb-20">
       <h1
         class="sm:text-4xl text-2xl font-medium title-font mt-2 mb-2 text-gray-900"
       >
-        Product List
+        Cost List
       </h1>
       <p class="lg:w-2/3 mx-auto leading-relaxed text-base">
         Registered list as of {% now "jS F Y H:i" %}
@@ -21,40 +21,35 @@
             <th
               class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl"
             >
-              Description
-            </th>
-            <th
-              class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-            >
               Carat
             </th>
             <th
               class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
             >
-              Buy Rate
-            </th>            
+              date
+            </th>
             <th
               class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
             >
-              Sell Rate
-            </th>
+              Cost
+            </th>            
           </tr>
         </thead>
-        {% if object_list %} {% for product in object_list %}
+        {% if object_list %} {% for cost in object_list %}
         <tbody>
           <tr>
             <td class="px-4 py-3">
-              <a href="{% url 'erm:product-detail' product.id %}">
-                {{ product.product_name }}
+              <a href="{% url 'erm:cost-detail' cost.id %}">
+                {{ cost.carat }}
               </a>
             </td>
-            <td class="px-4 py-3">{{ product.carat }}</td>
-            <td class="px-4 py-3">{{ product.buy_rate }}</td>
-            <td class="px-4 py-3">{{ product.sell_rate }}</td>
+            <td class="px-4 py-3">{{ cost.carat }}</td>
+            <td class="px-4 py-3">{{ cost.date }}</td>
+            <td class="px-4 py-3">{{ cost.cost }}</td>
           </tr>
         </tbody>
         {% endfor %} {% else %}
-        <p>There are no product to display.</p>
+        <p>There are no cost to display.</p>
         {% endif %}
       </table>
     </div>

@@ -7,6 +7,7 @@ from django.core.serializers import serialize
 from django.http import JsonResponse
 from json import loads
 from decimal import Decimal
+from datetime import datetime
 
 from .models import Client, Cost, Note, Noteitem, Location, Notekey, Notetype, Status, Noteitemkey, PO, POItem, PR, PRItem, Product, SO, SOItem, SR, SRItem, CO, COItem, WI, WR, WIItem, WRItem, Inv, InvControl, WorkInvControl
 
@@ -18,19 +19,22 @@ def notes(request):
     client = request.GET.get('client', '')
     location = request.GET.get('location', '')
 
+    # One day old notes not displayed
     if notetype or client:
         if notetype and client and location:
-            notes = Note.objects.filter(notetype_id=notetype, client_id=client, location_id=location)
+            notes = Note.objects.filter(notetype_id=notetype, created_on=datetime.today(), client_id=client, location_id=location)
+        if notetype and client and location:
+            notes = Note.objects.filter(notetype_id=notetype, created_on=datetime.today(), client_id=client, location_id=location)
         if notetype and client=='' and location =='':
-            notes = Note.objects.filter(notetype_id=notetype)
+            notes = Note.objects.filter(notetype_id=notetype, created_on=datetime.today())
         if notetype and location and client=='':
-            notes = Note.objects.filter(notetype_id=notetype, location_id=location)
+            notes = Note.objects.filter(notetype_id=notetype, created_on=datetime.today(), location_id=location)
         if notetype and location=='' and client:
-            notes = Note.objects.filter(notetype_id=notetype, client_id=client)
+            notes = Note.objects.filter(notetype_id=notetype, created_on=datetime.today(), client_id=client)
         if notetype=="" and client:
-            notes = Note.objects.filter(client_id=client)
+            notes = Note.objects.filter(client_id=client, created_on=datetime.today())
         if notetype=="" and client and location:
-            notes = Note.objects.filter(client_id=client, location_id=location)
+            notes = Note.objects.filter(client_id=client, created_on=datetime.today(), location_id=location)
         #return render(request, 'note/notes.html', {'notes': notes, 'notetypes': notetypes, 'clients': clients, 'locations': locations, 's_notetype': s_notetype})
     
     return render(request, 'note/notes.html', {'notes': notes})

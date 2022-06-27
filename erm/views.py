@@ -3,9 +3,11 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render, reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from erm.models import Collection, Product, PurchaseOrder, PurchaseOrderItem
+from erm.models import Collection, PurchaseOrder, PurchaseOrderItem
+from note.models import Product, Cost, Note, Notetype, Client, Location
 from util.models import UserProfile
-from .forms import POItemsFormSet, ProductModelForm, POItemForm, POForm, POModelForm
+from django.db.models import Q
+from .forms import POItemsFormSet, ProductModelForm, CostModelForm, POItemForm, POForm, POModelForm
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
 
 """ def product_create(request):
@@ -29,6 +31,94 @@ from django.views.generic import TemplateView, ListView, DetailView, CreateView,
     }
     return render(request, "erm/product_create.html", context) """
 
+def notelist(request):
+    notetypes = Notetype.objects.all()
+    clients = Client.objects.all()
+    locations = Location.objects.all()
+    notes = None
+    return render(request, 'erm/note_list.html', {'notes': notes, 'notetypes': notetypes, 'locations': locations, 'clients': clients })
+
+
+def notelistrep(request):
+
+    notes = None
+    
+    notetype = request.POST.get('notetype', '')
+    client = request.POST.get('client', '')
+    location = request.POST.get('location', '')
+
+    # One day old notes not displayed
+    # if notetype or client:
+    #     if notetype and client and location:
+    #         notes = Note.objects.filter(notetype_id=notetype, created_on=datetime.today(), client_id=client, location_id=location)
+    #     if notetype and client and location:
+    #         notes = Note.objects.filter(notetype_id=notetype, created_on=datetime.today(), client_id=client, location_id=location)
+    #     if notetype and client=='' and location =='':
+    #         notes = Note.objects.filter(notetype_id=notetype, created_on=datetime.today())
+    #     if notetype and location and client=='':
+    #         notes = Note.objects.filter(notetype_id=notetype, created_on=datetime.today(), location_id=location)
+    #     if notetype and location=='' and client:
+    #         notes = Note.objects.filter(notetype_id=notetype, created_on=datetime.today(), client_id=client)
+    #     if notetype=="" and client:
+    #         notes = Note.objects.filter(client_id=client, created_on=datetime.today())
+    #     if notetype=="" and client and location:
+    #         notes = Note.objects.filter(client_id=client, created_on=datetime.today(), location_id=location)
+    #     #return render(request, 'note/notes.html', {'notes': notes, 'notetypes': notetypes, 'clients': clients, 'locations': locations, 's_notetype': s_notetype})
+    
+    # tags = ['tag1', 'tag2', 'tag3']
+    # q_objects = Q() # Create an empty Q object to start with
+    # for t in tags:
+    #     q_objects |= Q(tags__tag__contains=t) # 'or' the Q objects together
+
+    # designs = Design.objects.filter(q_objects)
+    
+    # tags = ['notetype', 'client', 'location']
+    # q_objects = Q() # Create an empty Q object to start with
+    # for t in tags:
+    #     q_objects |= Q(tags__tag__contains=t) # 'or' the Q objects together
+
+    my_dict = {'notetype': notetype, 'client': client, 'location': location}  # Your dict with fields
+    or_condition = Q()
+    for key, value in my_dict.items():
+        if value:
+            or_condition.add(Q(**{key: value}), Q.AND)
+
+    query_set = Note.objects.filter(or_condition)
+     
+    return render(request, 'erm/notelist_data.html', {'notes': query_set})
+
+
+class CostCreateView(LoginRequiredMixin, CreateView):
+    template_name = "erm/cost_create.html"
+    form_class = CostModelForm
+
+    def get_success_url(self):
+        return reverse("erm:cost-list") 
+
+class CostListView(LoginRequiredMixin, ListView):
+    template_name = "erm/cost_list.html"
+    queryset = Cost.objects.all()
+
+class CostDetailView(LoginRequiredMixin, DetailView):
+    template_name = "erm/cost_detail.html"
+    queryset = Cost.objects.all()
+    form_class = CostModelForm
+
+class CostUpdateView(LoginRequiredMixin, UpdateView):
+    template_name = "erm/cost_update.html"
+    queryset = Cost.objects.all()
+    form_class = CostModelForm
+
+    def get_success_url(self):
+        return reverse("erm:cost-list") 
+
+class CostDeleteView(LoginRequiredMixin, DeleteView):
+    template_name = "erm/cost_delete.html"
+    queryset = Cost.objects.all()
+
+    def get_success_url(self):
+        return reverse("erm:cost-list")
+
 class ProductCreateView(LoginRequiredMixin, CreateView):
     template_name = "erm/product_create.html"
     form_class = ProductModelForm
@@ -37,7 +127,7 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
         return reverse("erm:product-list") 
 
 class ProductListView(LoginRequiredMixin, ListView):
-    template_name = "erm/product-list.html"
+    template_name = "erm/product_list.html"
     queryset = Product.objects.all()
 
 class ProductDetailView(LoginRequiredMixin, DetailView):

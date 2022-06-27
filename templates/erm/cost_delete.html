@@ -1,0 +1,45 @@
+{% extends "base.html" %} {% load tailwind_filters %} {% block content %}
+
+<section class="text-gray-600 body-font">
+  <div class="container px-5 py-2 mx-auto">
+    <div class="max-w-lg mx-auto">
+      <div class="max-w-lg mx-auto">
+        <h1 class="text-2xl text-gray-800">
+          Cost - {{ cost.carat }}
+        </h1>
+      </div>
+      <div class="py-5 border-b border-gray-200">
+        <a
+          class="hover:text-blue-500"
+          href="{% url 'erm:product-list' %}"
+          rel="noopener noreferrer"
+          >Cost List</a
+        >
+      </div>
+
+      <div class="flex border-t border-b mb-6 border-gray-200 py-2">
+        <span class="text-gray-500">Cost</span>
+        <span class="ml-auto text-gray-900">{{ cost.carat }}</span>
+      </div>
+      <div class="flex border-t border-b mb-6 border-gray-200 py-2">
+        <span class="text-gray-500">Date</span>
+        <span class="ml-auto text-gray-900">{{ cost.date }}</span>
+      </div>
+      <div class="flex border-t border-b mb-6 border-gray-200 py-2">
+        <span class="text-gray-500">Cost</span>
+        <span class="ml-auto text-gray-900">{{ cost.cost }}</span>
+      </div>
+
+      <form method="post" class="mt-5">
+        {% csrf_token %} {{form|crispy}}
+        <button
+          type="submit"
+          class="w-full text-white bg-red-500 hover:bg-red-600 px-3 py-2 rounded-md"
+        >
+          Delete Confirmation
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock content %}

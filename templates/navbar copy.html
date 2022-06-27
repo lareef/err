@@ -10,7 +10,8 @@
         {% comment %} {% if request.user.is_authenticated and user.is_active %} {% endcomment %}
         {% if request.user.is_active %}
         <a href="{% url 'erm:product-list' %}" class="mr-5 hover:text-gray-900">Products</a> 
-        <a href="{% url 'erm:doc-list' %}" class="mr-5 hover:text-gray-900">Purchase</a> 
+        <a href="{% url 'erm:cost-list' %}" class="mr-5 hover:text-gray-900">Cost</a> 
+        <a href="{% url 'erm:note-list' %}" class="mr-5 hover:text-gray-900">Note-Report</a> 
         <a href="{% url 'note:init' %}" class="mr-5 hover:text-gray-900">Notes</a> 
         {% endif %}
         {% if not request.user.is_authenticated %} 
