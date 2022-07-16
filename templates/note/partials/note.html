@@ -1,3 +1,4 @@
+{% load tz %}
 <article class="flex{% if note.is_final %} bg-green-50{% endif %}">
   <div class="w-4/5 py-3">
     <a
@@ -9,7 +10,8 @@
     >
       {{ note.notetype }} -
       {{ note.notekey }}
-      {{ note.created_on }}
+      {% comment %} {{ note.created_on|timezone:TIME_ZONE }} {% endcomment %}
+      {{ note.created_on|localtime }}
       {{ note.id }}
     </a>
   </div>
@@ -37,4 +39,9 @@
     </a>
     {% endif %}    
   </div>
+
+  <div id="alerts" class="px-6 text-xs font-bold text-red-500 uppercase" hx-swap-oob="true">
+   -  {{msg}}
+  </div>
+
 </article>

@@ -1,0 +1,24 @@
+<article class="flex bg-green-50">
+      <div class="divide-y divide-gray-200">
+            {% for noteitem in noteitems %}
+              <p
+                class="px-6 text-xs text-gray-900"
+              >
+                {{ noteitem.product }}      
+                {{ noteitem.icost }}
+                {{ noteitem.weight }}
+                {{ noteitem.quantity }}
+                {{ noteitem.pcost }}
+              </p>
+            {%endfor %}
+
+            <button
+              class="p-3 rounded-xl text-white bg-red-500 hover:bg-red-600"
+              hx-get="noteitemslist_delete/{{ note.id}}"
+              hx-target="#note{{ note.id }}"
+              hx-swap="innerHTML"
+            >
+            Hide
+            </button>
+          </div>
+</article>

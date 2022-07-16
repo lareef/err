@@ -1,24 +1,77 @@
 <div id="noteitems">
-  <div class="w-6/7 my-6 mx-auto p-2 lg:p-1 bg-white rounded-xl">
-    <form class="flex mb-6 space-x-4">
+  <div class="flex mb-2 space-x-4 w-6/7 my-1 mx-auto p-2 lg:p-1 bg-white rounded-xl">
+     <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-normal mb-3" for="note">
+        TRANSACTION
+      </label>  
+      <label class="note flex-1 px-4 py-3 bg-blue-200 rounded-xl">
+        {{ note.notetype }}
+      </label>
+    </div>
+
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-normal mb-3" for="note">
+        BRANCH
+      </label>  
+      <label class="note flex-1 px-4 py-3 bg-blue-200 rounded-xl">
+        {{ note.location }}
+      </label>
+    </div>
+
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-normal mb-3" for="note">
+        CLIENT
+      </label>  
+      <label class="note flex-1 px-4 py-3 bg-blue-200 rounded-xl">
+        {{ note.client }}
+      </label>
+    </div>
+
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-normal mb-3" for="note">
+        NO.
+      </label>  
       <label class="note flex-1 px-4 py-3 bg-blue-200 rounded-xl">
         {{ note.notekey }}
       </label>
+    </div>
 
+  </div>
+
+  <div class="w-6/7 my-6 mx-auto p-2 lg:p-1 bg-white rounded-xl">
+    <form class="flex mb-6 space-x-4">
+
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-bold" for="product">
+        PRODUCT
+      </label>      
       <select
-          id="productlist" name="product" hx-trigger="change" hx-get="invlist/{{ note.id }}/" hx-target="#invlist" placeholder="Product" class="title flex-1 px-4 py-3 bg-gray-200 rounded-xl"/>
+          id="productlist" name="product" hx-trigger="change" hx-get="invlist/{{ note.id }}/" hx-target="#invlist" placeholder="Product" class="product flex-1 px-4 py-3 bg-gray-200 rounded-xl"/>
           <option value="">Product</option>
           {% for product in products %}
             <option value="{{ product.id}}">{{ product.product_name }} {{ product.carat.carat }}</option>
           {% endfor %}
       </select>
+    </div>
+
       {% if note.notetype_id == 2 or note.notetype_id == 4 %}
+
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-bold" for="weight">
+        WEIGHT
+      </label>
       <select
           id="invlist" name="weight" placeholder="Available Items Weight" class="weight flex-1 px-4 py-3 bg-gray-200 rounded-xl"
-          hx-trigger="change" hx-post="icost/{{ note.id }}/" hx-target="#prodcost"/>
+          hx-trigger="change" hx-post="icost/{{ note.id }}/" hx-target="#invlist"/>
         <option value="">Available Items Weight</option>
       </select>
+    </div>
       {% else %}
+
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-bold" for="weight">
+        WEIGHT
+      </label>
       <input
        id="invlist"
         hx-trigger="change" hx-post="icost/{{ note.id }}/" hx-target="#invlist"
@@ -29,33 +82,47 @@
         class="weight flex-1 px-4 py-3 bg-gray-200 rounded-xl"
         placeholder="weight"
       />
+    </div>
       {% endif %}
- 
+
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-bold" for="prodcost">
+        RATE
+      </label>      
       <input
       id="prodcost"
-        hx-trigger="change" hx-post="icost/{{ note.notetype.id }}/" hx-target="#invlist"
+        hx-trigger="change" hx-post="icost/{{ note.id }}/" hx-target="#prodcost"
         type="number"
         name="prodcost"
         value="{{prodcost}}"
         step=".01"
         class="prodcost flex-1 px-4 py-3 bg-gray-200 rounded-xl"
         placeholder="{{prodcost}}"
-      /> 
+      />
+    </div>
 
-
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-bold" for="qty">
+        QUANTITY
+      </label> 
       <input
       id="qty"
-        hx-trigger="change" hx-post="icost/{{ note.notetype.id }}/" hx-target="#invlist"
+        hx-trigger="change" hx-post="icost/{{ note.id }}/" hx-target="#invlist"
         type="number"
         name="qty"
         value="1"
         class="qty flex-1 px-4 py-3 bg-gray-200 rounded-xl"
         placeholder="qty"
       />
+    </div>
 
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-bold" for="icost">
+        COST
+      </label>     
       <input
       id="icost"
-        hx-trigger="change" hx-post="icost/{{ note.notetype.id }}/" hx-target="#invlist"
+        hx-trigger="change" hx-post="icost/{{ note.id }}/" hx-target="#invlist"
         type="number"
         name="icost"
         value="{{icost}}"
@@ -63,8 +130,14 @@
         placeholder="{{icost}}"
         disabled="true"
       /> 
+    </div>
 
       {% if note.status_id == 0 %}
+
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-bold" for="add">
+        ADD
+      </label>       
       <button
         hx-post="{% url 'note:add_noteitem' note.id %}"
         hx-target="#noteitemlist"
@@ -73,8 +146,14 @@
       >
         +
       </button>
-      {% endif %}
+    </div>
 
+    {% endif %}
+
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-bold" for="exit">
+        EXIT
+      </label>  
       <button
         {% comment %} hx-get="{% url 'notescopy' %}" {% endcomment %}
         class="p-3 rounded-xl text-white bg-red-500 hover:bg-red-600"
@@ -82,6 +161,7 @@
       >
         X
       </button>
+    </div>
 
     </form>
     <div class="flex py-3 rounded-xl bg-gray-100">

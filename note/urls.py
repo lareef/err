@@ -1,6 +1,6 @@
 from django.urls import path
 
-from note.views import init, notes, noteitems, add_note, update_note, delete_note, add_noteitem, update_noteitem, delete_noteitem, edit_noteitem, invlist, invdata, val_qty, val_cost, val_icost
+from note.views import init, notes, noteitems, add_note, update_note, delete_note, add_noteitem, update_noteitem, delete_noteitem, edit_noteitem, invlist, icost
 
 app_name = 'note'
 
@@ -16,8 +16,8 @@ urlpatterns = [
     path('delete_noteitem/<int:pk>/', delete_noteitem, name='delete_noteitem'),
     path('edit_noteitem/<int:pk>/', edit_noteitem, name='edit_noteitem'),
     path('invlist/<int:pk>/', invlist, name='invlist'),
-    path('invdata/', invdata, name='invdata'),
-    path('val_cost/', val_cost, name='val_cost'),
-    path('val_qty/', val_qty, name='val_qty'),
-    path('icost/<int:pk>/', val_icost, name='icost'),
+    # path('invdata/', invdata, name='invdata'),
+    # path('val_cost/', val_cost, name='val_cost'),
+    # path('val_qty/', val_qty, name='val_qty'),
+    path('icost/<int:pk>/', icost, name='icost'),
 ]

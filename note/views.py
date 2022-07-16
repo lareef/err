@@ -8,6 +8,8 @@ from django.http import JsonResponse
 from json import loads
 from decimal import Decimal
 from datetime import datetime
+from django.utils import timezone
+from django.db.models import Q
 
 from .models import Client, Cost, Note, Noteitem, Location, Notekey, Notetype, Status, Noteitemkey, PO, POItem, PR, PRItem, Product, SO, SOItem, SR, SRItem, CO, COItem, WI, WR, WIItem, WRItem, Inv, InvControl, WorkInvControl
 
@@ -20,21 +22,25 @@ def notes(request):
     location = request.GET.get('location', '')
 
     # One day old notes not displayed
+    
+    # creationDate = datetime.datetime.now()
+    todayDate = timezone.now()
+    
     if notetype or client:
         if notetype and client and location:
-            notes = Note.objects.filter(notetype_id=notetype, created_on=datetime.today(), client_id=client, location_id=location)
+            notes = Note.objects.filter(notetype_id=notetype, created_on__date=todayDate, client_id=client, location_id=location)
         if notetype and client and location:
-            notes = Note.objects.filter(notetype_id=notetype, created_on=datetime.today(), client_id=client, location_id=location)
+            notes = Note.objects.filter(notetype_id=notetype, created_on__date=todayDate, client_id=client, location_id=location)
         if notetype and client=='' and location =='':
-            notes = Note.objects.filter(notetype_id=notetype, created_on=datetime.today())
+            notes = Note.objects.filter(notetype_id=notetype, created_on__date=todayDate)
         if notetype and location and client=='':
-            notes = Note.objects.filter(notetype_id=notetype, created_on=datetime.today(), location_id=location)
+            notes = Note.objects.filter(notetype_id=notetype, created_on__date=todayDate, location_id=location)
         if notetype and location=='' and client:
-            notes = Note.objects.filter(notetype_id=notetype, created_on=datetime.today(), client_id=client)
+            notes = Note.objects.filter(notetype_id=notetype, created_on__date=todayDate, client_id=client)
         if notetype=="" and client:
-            notes = Note.objects.filter(client_id=client, created_on=datetime.today())
+            notes = Note.objects.filter(client_id=client, created_on__date=todayDate)
         if notetype=="" and client and location:
-            notes = Note.objects.filter(client_id=client, created_on=datetime.today(), location_id=location)
+            notes = Note.objects.filter(client_id=client, created_on__date=todayDate, location_id=location)
         #return render(request, 'note/notes.html', {'notes': notes, 'notetypes': notetypes, 'clients': clients, 'locations': locations, 's_notetype': s_notetype})
     
     return render(request, 'note/notes.html', {'notes': notes})
@@ -87,10 +93,18 @@ def init(request):
 @require_http_methods(['POST'])
 def add_note(request):
     note = None
+    obj_note = None
     notetype = request.POST.get('notetype', '')
+    location = request.POST.get('location', '')
     notekey = request.POST.get('notekey', '')
     client = request.POST.get('client', '')
-
+    
+    my_dict = {'notetype': notetype, 'client': client, 'location': location, 'notekey': notekey}  # Your dict with fields
+    msg=""
+    for key, value in my_dict.items():
+        if value=="":
+            msg=msg + key + " "
+        
     if notekey and notetype!=None and client:
         obj_notetype = Notetype.objects.get(id=notetype)
         obj_notekey, create_notekey = Notekey.objects.get_or_create(notekey=notekey)
@@ -119,12 +133,12 @@ def add_note(request):
         if obj_notetype.id == 4:
             obj_wo, create_so = WI.objects.get_or_create(notekey=obj_notekey, notetype=obj_notetype, typ=obj_notetype.id, client=obj_client)
             obj_note = Note.objects.get(id=obj_wo.note_ptr_id)
- 
+
         if obj_notetype.id == 14:
             obj_wo, create_so = WR.objects.get_or_create(notekey=obj_notekey, notetype=obj_notetype, typ=obj_notetype.id, client=obj_client)
             obj_note = Note.objects.get(id=obj_wo.note_ptr_id)
                    
-    return render(request, 'note/partials/note.html', {'note': obj_note})
+    return render(request, 'note/partials/note.html', {'note': obj_note, 'msg': msg})
 
 @require_http_methods(['GET', 'POST'])
 def edit_note(request, pk):
@@ -200,48 +214,48 @@ def invlist(request, pk):
     icost=prodcost*qty*weight
     return render(request, 'note/invlist.html', {'note': note, 'invlist':invlist, 'message' : message, 'prodcost' : prodcost, 'weight': weight, 'qty': qty, 'icost': icost})
 
-@require_http_methods(['GET', 'POST'])
-def invdata(request):
-    message=None
-    weight = request.POST.get('weight', '')
-    quantity = request.POST.get('quantity', '')
-    if '-' in weight:
-        s_invitem = weight.split('-')[2]
-        obj_invcontrol=InvControl.objects.get(id=s_invitem)
-        if int(quantity) > obj_invcontrol.inventory:
-            message = "Maximum Quantity exceeded"
-    #return HttpResponse(error)
-    return render(request, 'note/partials/message.html', {'message': message})
+# @require_http_methods(['GET', 'POST'])
+# def invdata(request):
+#     message=None
+#     weight = request.POST.get('weight', '')
+#     quantity = request.POST.get('quantity', '')
+#     if '-' in weight:
+#         s_invitem = weight.split('-')[2]
+#         obj_invcontrol=InvControl.objects.get(id=s_invitem)
+#         if int(quantity) > obj_invcontrol.inventory:
+#             message = "Maximum Quantity exceeded"
+#     #return HttpResponse(error)
+#     return render(request, 'note/partials/message.html', {'message': message})
 
-@require_http_methods(['GET', 'POST'])
-def val_qty(request):
-    message=None
-    weight = request.POST.get('weight', '')
-    qty = request.POST.get('qty', '')
-    if qty=='' or qty==0:
-        message = "Quantity is mandatory!"
-        return render(request, 'note/partials/message.html', {'message': message})
+# @require_http_methods(['GET', 'POST'])
+# def val_qty(request):
+#     message=None
+#     weight = request.POST.get('weight', '')
+#     qty = request.POST.get('qty', '')
+#     if qty=='' or qty==0:
+#         message = "Quantity is mandatory!"
+#         return render(request, 'note/partials/message.html', {'message': message})
 
-    if '-' in weight:
-        s_invitem = weight.split('-')[2]
-        obj_invcontrol=InvControl.objects.get(id=s_invitem)
-        if int(qty) > obj_invcontrol.inventory:
-            message = "Maximum Quantity Exceeded!"
-    #return HttpResponse(message)
-    return render(request, 'note/partials/message.html', {'message': message})
+#     if '-' in weight:
+#         s_invitem = weight.split('-')[2]
+#         obj_invcontrol=InvControl.objects.get(id=s_invitem)
+#         if int(qty) > obj_invcontrol.inventory:
+#             message = "Maximum Quantity Exceeded!"
+#     #return HttpResponse(message)
+#     return render(request, 'note/partials/message.html', {'message': message})
 
-@require_http_methods(['GET', 'POST'])
-def val_cost(request):
-    message=None
-    weight = request.POST.get('weight', '')
-    cost = request.POST.get('cost', '')
-    if '-' in weight:
-        s_invitem = weight.split('-')[2]
-        obj_invcontrol=InvControl.objects.get(id=s_invitem)
-        if float(cost) <= obj_invcontrol.noteitem.cost:
-            message = "Cost less than purchased!"
-    #return HttpResponse(message)
-    return render(request, 'note/partials/message.html', {'message': message})
+# @require_http_methods(['GET', 'POST'])
+# def val_cost(request):
+#     message=None
+#     weight = request.POST.get('weight', '')
+#     cost = request.POST.get('cost', '')
+#     if '-' in weight:
+#         s_invitem = weight.split('-')[2]
+#         obj_invcontrol=InvControl.objects.get(id=s_invitem)
+#         if float(cost) <= obj_invcontrol.noteitem.cost:
+#             message = "Cost less than purchased!"
+#     #return HttpResponse(message)
+#     return render(request, 'note/partials/message.html', {'message': message})
 
 @require_http_methods(['GET', 'POST'])
 def icost(request, pk):
@@ -260,9 +274,9 @@ def icost(request, pk):
         
     if qty=='' or qty==0:
         message = "Quantity is mandatory!"
-        return render(request, 'note/partials/message.html', {'message': message})
+        return render(request, 'note/partials/message.html', {'message': message, 'note': note})
 
-
+    wgt=weight
 
     if '-' in weight:
         s_invitem = weight.split('-')[2]
@@ -289,48 +303,48 @@ def icost(request, pk):
     return render(request, 'note/invlist.html', {'note': note, 'weight': weight, 'invlist':invlist, 'message' : message, 'prodcost' : prodcost, 'qty': qty, 'icost': icost})
         
 
-@require_http_methods(['GET', 'POST'])
-def val_icost(request, pk):
-    note = Note.objects.get(id=pk)
-    message=None
-    product=request.POST.get('product', '')
-    prodcost=request.POST.get('prodcost', '')
-    wgt = weight = request.POST.get('weight', '')
-    icost = request.POST.get('icost', '')
-    qty = request.POST.get('qty', '')
+# @require_http_methods(['GET', 'POST'])
+# def val_icost(request, pk):
+#     note = Note.objects.get(id=pk)
+#     message=None
+#     product=request.POST.get('product', '')
+#     prodcost=request.POST.get('prodcost', '')
+#     wgt = weight = request.POST.get('weight', '')
+#     icost = request.POST.get('icost', '')
+#     qty = request.POST.get('qty', '')
 
-    if weight=='' or weight==0:
-        weight=1
-    if qty=='' or qty==0:
-        qty=1
+#     if weight=='' or weight==0:
+#         weight=1
+#     if qty=='' or qty==0:
+#         qty=1
         
-    if qty=='' or qty==0:
-        message = "Quantity is mandatory!"
-        return render(request, 'note/partials/message.html', {'message': message})
+#     if qty=='' or qty==0:
+#         message = "Quantity is mandatory!"
+#         return render(request, 'note/partials/message.html', {'message': message})
 
-    if '-' in weight:
-        s_invitem = weight.split('-')[2]
-        wgt = weight.split('-')[0]
-        obj_invcontrol=InvControl.objects.get(id=s_invitem)
-        if int(qty) > obj_invcontrol.inventory:
-            message = "Maximum Quantity Exceeded!"
-        #if float(icost) <= obj_invcontrol.noteitem.cost:
-        #    message = "Cost less than purchased!"
+#     if '-' in weight:
+#         s_invitem = weight.split('-')[2]
+#         wgt = weight.split('-')[0]
+#         obj_invcontrol=InvControl.objects.get(id=s_invitem)
+#         if int(qty) > obj_invcontrol.inventory:
+#             message = "Maximum Quantity Exceeded!"
+#         #if float(icost) <= obj_invcontrol.noteitem.cost:
+#         #    message = "Cost less than purchased!"
     
-    #weight=float(weight)
-    #qty=int(qty)
-    obj_product=Product.objects.get(pk=product)
-    #invlist = InvControl.objects.filter(product_id=product, inventory__gt =0 )
-    cost=Cost.objects.filter(carat_id=obj_product.carat_id).first()
-    rate=obj_product.sell_rate
-    if note.notetype.id == 1:
-        rate=obj_product.buy_rate
-        prodcost=cost.cost+(cost.cost/100*rate)
-    if note.notetype.id == 2:
-        rate=obj_product.sell_rate
-        prodcost=cost.cost+(cost.cost/100*rate)
-    icost=Decimal(prodcost)*int(qty)*Decimal(wgt) 
-    return render(request, 'note/partials/icost.html', {'message' : message, 'prodcost' : prodcost, 'qty': qty, 'icost': icost})
+#     #weight=float(weight)
+#     #qty=int(qty)
+#     obj_product=Product.objects.get(pk=product)
+#     #invlist = InvControl.objects.filter(product_id=product, inventory__gt =0 )
+#     cost=Cost.objects.filter(carat_id=obj_product.carat_id).first()
+#     rate=obj_product.sell_rate
+#     if note.notetype.id == 1:
+#         rate=obj_product.buy_rate
+#         prodcost=cost.cost+(cost.cost/100*rate)
+#     if note.notetype.id == 2:
+#         rate=obj_product.sell_rate
+#         prodcost=cost.cost+(cost.cost/100*rate)
+#     icost=Decimal(prodcost)*int(qty)*Decimal(wgt) 
+#     return render(request, 'note/partials/icost.html', {'message' : message, 'prodcost' : prodcost, 'qty': qty, 'icost': icost})
 
 
 @require_http_methods(['GET', 'POST'])

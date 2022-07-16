@@ -4,32 +4,11 @@ from django.shortcuts import redirect, render, reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from erm.models import Collection, PurchaseOrder, PurchaseOrderItem
-from note.models import Product, Cost, Note, Notetype, Client, Location
+from note.models import Product, Cost, Note, Noteitem, Notetype, Client, Location
 from util.models import UserProfile
-from django.db.models import Q
+from django.db.models import Q, Count, Sum
 from .forms import POItemsFormSet, ProductModelForm, CostModelForm, POItemForm, POForm, POModelForm
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
-
-""" def product_create(request):
-    print(request.POST)
-    form = ProductModelForm()
-    if request.method == 'POST':
-        form = ProductModelForm(request.POST)
-        if form.is_valid():
-            description = form.cleaned_data['description']
-            reorder_level = form.cleaned_data['reorder_level']
-            # collection = Collection.objects.first()
-            collection = form.cleaned_data['collection']
-            Product.objects.create(
-                description=description,
-                reorder_level=reorder_level,
-                collection=collection
-            )
-            return redirect("/")
-    context = {
-        "form": form
-    }
-    return render(request, "erm/product_create.html", context) """
 
 def notelist(request):
     notetypes = Notetype.objects.all()
@@ -47,46 +26,24 @@ def notelistrep(request):
     client = request.POST.get('client', '')
     location = request.POST.get('location', '')
 
-    # One day old notes not displayed
-    # if notetype or client:
-    #     if notetype and client and location:
-    #         notes = Note.objects.filter(notetype_id=notetype, created_on=datetime.today(), client_id=client, location_id=location)
-    #     if notetype and client and location:
-    #         notes = Note.objects.filter(notetype_id=notetype, created_on=datetime.today(), client_id=client, location_id=location)
-    #     if notetype and client=='' and location =='':
-    #         notes = Note.objects.filter(notetype_id=notetype, created_on=datetime.today())
-    #     if notetype and location and client=='':
-    #         notes = Note.objects.filter(notetype_id=notetype, created_on=datetime.today(), location_id=location)
-    #     if notetype and location=='' and client:
-    #         notes = Note.objects.filter(notetype_id=notetype, created_on=datetime.today(), client_id=client)
-    #     if notetype=="" and client:
-    #         notes = Note.objects.filter(client_id=client, created_on=datetime.today())
-    #     if notetype=="" and client and location:
-    #         notes = Note.objects.filter(client_id=client, created_on=datetime.today(), location_id=location)
-    #     #return render(request, 'note/notes.html', {'notes': notes, 'notetypes': notetypes, 'clients': clients, 'locations': locations, 's_notetype': s_notetype})
-    
-    # tags = ['tag1', 'tag2', 'tag3']
-    # q_objects = Q() # Create an empty Q object to start with
-    # for t in tags:
-    #     q_objects |= Q(tags__tag__contains=t) # 'or' the Q objects together
-
-    # designs = Design.objects.filter(q_objects)
-    
-    # tags = ['notetype', 'client', 'location']
-    # q_objects = Q() # Create an empty Q object to start with
-    # for t in tags:
-    #     q_objects |= Q(tags__tag__contains=t) # 'or' the Q objects together
-
     my_dict = {'notetype': notetype, 'client': client, 'location': location}  # Your dict with fields
     or_condition = Q()
     for key, value in my_dict.items():
         if value:
             or_condition.add(Q(**{key: value}), Q.AND)
 
-    query_set = Note.objects.filter(or_condition)
-     
+    query_set = Note.objects.filter(or_condition).annotate(p=Sum('noteitem__pcost'), w=Sum('noteitem__weight'))
+    #QAr.objects.all().annotate(Count('qaerrors__dept')).filter(dept=1)
     return render(request, 'erm/notelist_data.html', {'notes': query_set})
 
+def noteitemslist(request, pk):
+    note = Note.objects.get(id=pk)
+    noteitems = Noteitem.objects.filter(note_id=note.id)
+
+    return render(request, 'erm/partials/noteitems_list_rep.html', {'note': note, 'noteitems': noteitems})
+
+def noteitemslist_delete(request, pk):
+    return HttpResponse()
 
 class CostCreateView(LoginRequiredMixin, CreateView):
     template_name = "erm/cost_create.html"
@@ -150,7 +107,7 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
     def get_success_url(self):
         return reverse("erm:product-list")
 
-class POCreateView(LoginRequiredMixin, CreateView):
+''' class POCreateView(LoginRequiredMixin, CreateView):
     template_name = "erm/po_create.html"
     form_class = POForm
 
@@ -217,7 +174,7 @@ def POCreate(request):
         "form": form
     }
     return render(request, "erm/po_head.html", context)
-
+ '''
 # class POCreateView(LoginRequiredMixin, CreateView):
 #     template_name = "erm/po_create.html"
 #     form_class = POForm
@@ -241,7 +198,7 @@ def POCreate(request):
     
 #     return render(request, "erm/create_po.html", context)
 
-def create_poitem(request, pk):
+''' def create_poitem(request, pk):
     po = PurchaseOrder.objects.get(purchase_order_id=pk)
     poitems = PurchaseOrderItem.objects.filter(purchase_order=po)
     form = POItemForm(request.POST or None)
@@ -389,4 +346,4 @@ def doc_create(request):
     context = {
         "form": form
     }
-    return render(request, "erm/doc_create.html", context)
+    return render(request, "erm/doc_create.html", context) '''

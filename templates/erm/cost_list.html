@@ -1,4 +1,5 @@
 {% extends "base.html" %} {% block content %}
+{% load tz %}
 
 <section class="text-gray-600 body-font">
   <div class="container px-5 py-2 mx-auto">
@@ -44,7 +45,7 @@
               </a>
             </td>
             <td class="px-4 py-3">{{ cost.carat }}</td>
-            <td class="px-4 py-3">{{ cost.date }}</td>
+            <td class="px-4 py-3">{{ cost.date|localtime }}</td>
             <td class="px-4 py-3">{{ cost.cost }}</td>
           </tr>
         </tbody>
