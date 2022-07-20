@@ -1,18 +1,20 @@
 <article class="flex{% if noteitem.is_final %} bg-green-50{% endif %}">
   <div class="w-4/5 py-3">
     <p
-      class="px-6 text-xs text-gray-900"
+      class="px-6 text-xl text-black-1000"
       {% if note.status_id == 0 %} hx-get="edit_noteitem/{{ noteitem.id }}/" {% endif %}   
       hx-target="this"
       hx-swap="outerHTML"
     >
+      <label class="note flex-1 px-4 py-3 bg-pink-200 font-bold rounded-xl">
+        {{ noteitem.id }}
+      </label>
       {{ noteitem.product }}      
-      {{ noteitem.quantity }}
-      {{ noteitem.cost }}
       {{ noteitem.weight }}
-      {{ noteitem.notetypekey }}
-      {{ noteitem.notekey }}
-      {{ noteitem.id }}
+      {{ noteitem.prate }}
+      {{ noteitem.quantity }}
+      {{ noteitem.pcost }}
+      {{ noteitem.icost }}
     </p>
   </div>
 

@@ -1,0 +1,51 @@
+    <div class="py-3">
+    <tr>
+    <a class="px-6 text-xl text-black-1000"
+      hx-get="noteitems/{{ note.id}}/"
+      hx-target="#main"
+      hx-swap="outerHTML">
+        <td class="px-4 py-3">{{ note.location }}</td>
+        <td class="px-4 py-3">{{ note.client }}</td>
+        <td class="px-4 py-3">{{ note.notekey }}</td>         
+        <td class="px-4 py-3">{{ note.created_on|localtime }}</td>
+     </a></tr>         
+
+  {% comment %} </div> {% endcomment %}
+
+  {% comment %} <div class="w-1/5 px-6 py-3 flex justify-end space-x-4"> {% endcomment %}
+    {% if note.status_id == 0 %}
+   <form
+      hx-put="update_note/{{ note.id }}/"
+      hx-target="closest article"
+      hx-swap="outerHTML"
+    >
+      <button class="text-sky-1000 hover:text-sky-1000">Close</button>
+    </form>
+
+ 
+    <a
+      href="#"
+      class="text-sky-1000 hover:text-sky-1000"
+      hx-confirm="Are you sure?"
+      hx-target="closest article"
+      hx-swap="outerHTML swap:1s"
+      hx-delete="delete_note/{{ note.id }}/"
+    >
+      Delete
+    </a>
+            
+    {% endif %}  
+    </div>
+
+
+              <div class="w-4/5">
+            <p class="px-6 text-xs font-medium text-gray-500 uppercase">Title</p>
+          </div>
+          <div class="w-4/5" id="message" hx-swap-oob="true" >
+          {% if message is not None %}
+              <p class ="px-6 text-xs font-medium text-gray-500 uppercase">{{message}}</p>
+          {% endif %}
+          </div>
+          <div class="hidden md:block w-1/5 px-6 text-right">
+            <p class="text-xs font-medium text-gray-500 uppercase">Actions</p>
+          </div>
