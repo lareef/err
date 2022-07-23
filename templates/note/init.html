@@ -84,41 +84,45 @@
         </div>
         </form>
 
+        <div class="lg:w-3/3 w-full mx-auto overflow-auto">
+          <table class="table-auto w-full text-left whitespace-no-wrap">
+            <thead>
+              <tr>
+                <th
+                  class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl"
+                >
+                  Location
+                </th>
+                <th
+                  class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
+                >
+                  Client
+                </th>
+                <th
+                  class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
+                >
+                  Transaction #
+                </th>            
+                <th
+                  class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
+                >
+                  Date & Time
+                </th>
+              </tr>
+            </thead>
+        </table>
+        </div>
 
-          <div>   
-              <div class="flex py-3 ">
-                <table class="table-auto w-full text-left whitespace-no-wrap">
-                  <thead class="rounded-xl bg-gray-100">
-                  <tr>
-                    <th
-                      class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100 rounded-tl rounded-bl"
-                    >
-                      Location
-                    </th>
-                    <th
-                      class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                    >
-                      Client
-                    </th>
-                    <th
-                      class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                    >
-                      Transaction No.
-                    </th>            
-                    <th
-                      class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100"
-                    >
-                      Date & Time
-                    </th>
-                  </tr>
-                </thead>
-              </table> 
-            </div>
-          </div>
-                  <div class="divide-y divide-gray-200" id="notes">
-                    {% for note in notes %} {% include 'note/partials/note.html' %} {%endfor %}
-                  </div>
+
+        <div class="divide-y divide-gray-200" id="notes">
+            {% if notes %} 
+            {% for note in notes %} {% include 'note/partials/note.html' %} {%endfor %}
+  
+            {% else %}
+              <p>There are no notes to display.</p>
+            {% endif %}
+        </div>
+
       </div>
     </section>
-
     {% endblock content %}

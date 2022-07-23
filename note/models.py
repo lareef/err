@@ -88,7 +88,7 @@ class Noteitem(models.Model):
     noteitemkey = models.ForeignKey(Noteitemkey, on_delete=models.CASCADE, related_name="%(class)s")
     notetypekey = models.ForeignKey(Notetype, on_delete=models.CASCADE, related_name="notetypes")
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='products')
-    weight = models.DecimalField(max_digits=6, decimal_places=2)
+    weight = models.DecimalField(max_digits=6, decimal_places=3)
     quantity = models.PositiveSmallIntegerField()
     costid=models.PositiveSmallIntegerField()
     prate = models.DecimalField(max_digits=15, decimal_places=2)
@@ -203,7 +203,7 @@ class WRItem(Noteitem):
 class Inv(models.Model):
     item = models.IntegerField(default=0)
     product = models.ForeignKey(Product, related_name='%(class)s', on_delete=models.CASCADE)
-    weight = models.DecimalField(max_digits=6, decimal_places=2)
+    weight = models.DecimalField(max_digits=6, decimal_places=3)
     updated_on = models.DateTimeField(auto_now=True)
     
     def __int__(self):
@@ -212,7 +212,7 @@ class Inv(models.Model):
 class Invitem(models.Model):
     inv = models.ForeignKey(Inv, related_name='%(class)s', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="%(class)s")
-    weight = models.DecimalField(max_digits=6, decimal_places=2)
+    weight = models.DecimalField(max_digits=6, decimal_places=3)
     
     class Meta:
         abstract = True

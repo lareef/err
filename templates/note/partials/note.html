@@ -1,43 +1,20 @@
 {% load tz %}
 <article class="flex{% if note.is_final %} bg-green-50{% endif %}">
-      <table class="table-auto w-full text-left whitespace-no-wrap">
         <tbody>
           <tr>
-            <td>
-              <a class="px-6 text-xl text-blue-1000"
+            <td class="px-4 py-3">
+               <a class="px-6 text-xl text-blue-1000"
               hx-get="noteitems/{{ note.id}}/"
               hx-target="#main"
               hx-swap="outerHTML"
               class="px-4 py-3">{{ note.location }}
-              </a>              
+              </a>
             </td>
             <td class="px-4 py-3">{{ note.client }}</td>
             <td class="px-4 py-3">{{ note.notekey }}</td>         
             <td class="px-4 py-3">{{ note.created_on|localtime }}</td>
-            <td>
-                <form
-                    hx-put="update_note/{{ note.id }}/"
-                    hx-target="closest article"
-                    hx-swap="outerHTML"
-                  >
-                    <button class="text-sky-1000 hover:text-sky-1000">Close</button>
-                </form>
-            </td>
-            <td>
-                <a
-                  href="#"
-                  class="text-sky-1000 hover:text-sky-1000"
-                  hx-confirm="Are you sure?"
-                  hx-target="closest article"
-                  hx-swap="outerHTML swap:1s"
-                  hx-delete="delete_note/{{ note.id }}/"
-                >
-                  Delete
-                </a>
-            </td>
           </tr>
         </tbody>
-</table>
 </article>
 
 <div id="alerts" class="px-6 text-xs font-bold text-red-500 uppercase" hx-swap-oob="true">
